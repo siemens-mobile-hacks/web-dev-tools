@@ -1,15 +1,17 @@
 /* @refresh reload */
+import { lazy } from 'solid-js';
 import { render } from 'solid-js/web';
+import { Router, Route, Navigate } from "@solidjs/router";
+import App from './pages/App';
 
-import './index.css';
-import App from './App';
+import 'bootstrap/dist/css/bootstrap.min.css';
 
-const root = document.getElementById('root');
+const Swilib = lazy(() => import("./pages/Swilib"));
 
-if (import.meta.env.DEV && !(root instanceof HTMLElement)) {
-  throw new Error(
-    'Root element not found. Did you forget to add it to your index.html? Or maybe the id attribute got misspelled?',
-  );
-}
+let dispose = render(() => (
+	<Router root={App} base={import.meta.env.BASE_URL}>
+		<Route path="/swilib" component={Swilib} />
+	</Router>
+), document.getElementById('root'));
 
-render(() => <App />, root);
+import.meta.hot && import.meta.hot.dispose(dispose); // for HMR
