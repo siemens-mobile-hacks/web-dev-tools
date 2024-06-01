@@ -19,6 +19,9 @@
 		"@solidjs/router": "^0.13.3",
 		"bootstrap": "^5.3.3",
 		"bootstrap-icons": "^1.11.3",
+		"date-fns": "^3.6.0",
+		"highlight.js": "^11.9.0",
+		"sass": "^1.77.1",
 		"solid-bootstrap": "^1.0.20",
 		"solid-js": "^1.8.11"
 	}

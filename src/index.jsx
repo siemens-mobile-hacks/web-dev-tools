@@ -5,12 +5,16 @@ import { Router, Route, Navigate } from "@solidjs/router";
 import App from './pages/App';
 
 import 'bootstrap/dist/css/bootstrap.min.css';
+import "bootstrap-icons/font/bootstrap-icons.css";
+import './index.scss';
 
 const Swilib = lazy(() => import("./pages/Swilib"));
+const SwilibPhone = lazy(() => import("./pages/SwilibPhone"));
 
 let dispose = render(() => (
 	<Router root={App} base={import.meta.env.BASE_URL}>
 		<Route path="/swilib" component={Swilib} />
+		<Route path="/swilib/phone" component={SwilibPhone} />
 	</Router>
 ), document.getElementById('root'));
 
