@@ -5,8 +5,8 @@ import path from 'path';
 import fs from 'fs';
 
 const ROUTES = [
-	`/screenshot`,
 	`/swilib`,
+	`/swilib/phone`,
 ];
 
 function postBuildPlugin() {

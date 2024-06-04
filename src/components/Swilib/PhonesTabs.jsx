@@ -1,3 +1,4 @@
+import { A } from "@solidjs/router";
 import { createResource } from "solid-js";
 import { SWILIB_TOOLS_API } from "~/utils";
 
@@ -16,7 +17,7 @@ function SwilibPhonesTabs(props) {
 			<Show when={!apiResult.loading && !apiResult.error}>
 				<div class="d-flex justify-content-between">
 					<For each={apiResult().all}>{(phone) =>
-						<a
+						<A
 							class="text-center text-decoration-none"
 							classList={{
 								'fw-bold': props.selectedPhone == phone.name
@@ -28,7 +29,7 @@ function SwilibPhonesTabs(props) {
 							<sup class="text-muted">
 								v{phone.sw}
 							</sup>
-						</a>
+						</A>
 					}</For>
 				</div>
 			</Show>
