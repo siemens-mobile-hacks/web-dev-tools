@@ -8,7 +8,7 @@
 		"dev": "vite",
 		"build": "vite build",
 		"serve": "vite preview",
-		"gh-pages-build": "vite build --base=/web-dev-tools",
+		"gh-pages-build": "vite build --base=/web-dev-tools"
 	},
 	"license": "MIT",
 	"devDependencies": {
