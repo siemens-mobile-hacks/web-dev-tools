@@ -7,19 +7,20 @@ import { Badge } from 'solid-bootstrap';
 import { getPlatformByPhone, formatId, SwiFlags } from '~/swilib';
 
 import TableSortButton from '~/components/TableSortButton';
-import SwilibEntryType from "~/components/Swilib/SwilibEntryType";
-import SwilibEntryBadges from "~/components/Swilib/SwilibEntryBadges";
-import SwilibEntryWarnings from "~/components/Swilib/SwilibEntryWarnings";
-import SwilibEntryName from "~/components/Swilib/SwilibEntryName";
+import SwilibEntryType from "~/components/Swilib/EntryType";
+import SwilibEntryBadges from "~/components/Swilib/EntryBadges";
+import SwilibEntryWarnings from "~/components/Swilib/EntryWarnings";
+import SwilibEntryName from "~/components/Swilib/EntryName";
+import SwilibPhonesTabs from '~/components/Swilib/PhonesTabs';
 
-function getRowColor(swilib, entry) {
-	if (swilib.errors[entry.id])
+function getRowColor(entry, swilib) {
+	if (swilib[entry.id]?.error)
 		return 'table-danger';
 	if (entry.name == null)
 		return '';
 	if ((entry.flags & SwiFlags.BUILTIN))
 		return 'table-info';
-	if (swilib.values[entry.id] == null)
+	if (swilib[entry.id]?.value == null)
 		return 'table-warning';
 	return '';
 }
@@ -27,7 +28,7 @@ function getRowColor(swilib, entry) {
 function SwilibTableRow(props) {
 	return (
 		<>
-			<tr class={getRowColor(props.swilib, props.entry)}>
+			<tr class={getRowColor(props.entry, props.swilib)}>
 				<td classList={{ 'text-muted': props.entry.name == null }}>
 					{formatId(props.entry.id)}
 				</td>
@@ -54,15 +55,20 @@ function SwilibTableRow(props) {
 							</div>
 						)}
 					</Show>
-					<Show when={props.swilib.errors[props.entry.id]}>
+					<Show when={props.swilib[props.entry.id]?.error}>
 						<div class="text-danger">
-							<i class="bi bi-exclamation-triangle"></i> {props.swilib.errors[props.entry.id]}
+							<i class="bi bi-exclamation-triangle"></i> {props.swilib[props.entry.id].error}
 						</div>
 					</Show>
 				</td>
+				<td classList={{ 'text-muted': props.entry.name == null }} hidden={!props.showOriginalSymbol}>
+					<Show when={props.swilib[props.entry.id]?.symbol}>
+						{props.swilib[props.entry.id].symbol}
+					</Show>
+				</td>
 				<td classList={{ 'text-muted': props.entry.name == null }}>
-					<Show when={props.swilib.values[props.entry.id] != null}>
-						{props.swilib.values[props.entry.id].toString(16).padStart(8, '0').toUpperCase()}
+					<Show when={props.swilib[props.entry.id]?.value != null}>
+						{props.swilib[props.entry.id].value.toString(16).padStart(8, '0').toUpperCase()}
 					</Show>
 				</td>
 			</tr>
@@ -82,9 +88,9 @@ function SwilibTable(props) {
 		newFunctions.sort((a, b) => sortAsc ? a.id - b.id : b.id - a.id);
 
 		if (props.filterByType == 'errors') {
-			newFunctions = newFunctions.filter((entry) => props.swilib.errors[entry.id]);
+			newFunctions = newFunctions.filter((entry) => props.swilib[entry.id]?.error != null);
 		} else if (props.filterByType == 'errors-plus-missing') {
-			newFunctions = newFunctions.filter((entry) => props.swilib.errors[entry.id] || props.swilib.values[entry.id] == null);
+			newFunctions = newFunctions.filter((entry) => props.swilib[entry.id]?.error != null || props.swilib[entry.id]?.value == null);
 		}
 
 		return newFunctions;
@@ -112,6 +118,9 @@ function SwilibTable(props) {
 						<th style="width:100%">
 							<small>Function</small>
 						</th>
+						<th class="text-center" hidden={!props.showOriginalSymbol}>
+							<small>Name in VKP</small>
+						</th>
 						<th class="text-center">
 							<small>Value</small>
 						</th>
@@ -123,6 +132,7 @@ function SwilibTable(props) {
 							entry={row}
 							showOldNames={props.showOldNames}
 							showEntryOffset={props.showEntryOffset}
+							showOriginalSymbol={props.showOriginalSymbol}
 							swilib={props.swilib}
 						/>
 					}</For>
@@ -133,38 +143,22 @@ function SwilibTable(props) {
 }
 
 function SwilibStatistic(props) {
-	let errorsCnt = 0;
-	let missingCnt = 0;
-	let goodCnt = 0;
-	let totalCnt = props.swilib.values.length;
-
-	for (let id = 0; id < totalCnt; id++) {
-		if (props.swilib.errors[id]) {
-			errorsCnt++;
-		} else if (props.swilib.missing.includes(id)) {
-			missingCnt++;
-		} else {
-			goodCnt++;
-		}
-	}
-
-	let calcPct = (v) => (v / totalCnt * 100).toFixed(0);
-
+	let calcPct = (v) => (v / props.stat.total * 100).toFixed(0);
 	return (
 		<div class="mb-3">
-			<Badge title="Good functions." bg="success fs-6">OK: {goodCnt} | {calcPct(goodCnt)}%</Badge>
+			<Badge title="Good functions." bg="success fs-6">OK: {props.stat.good} | {calcPct(props.stat.good)}%</Badge>
 			{' '}
-			<Badge title="Bad functions." bg="danger fs-6">BAD: {errorsCnt} | {calcPct(errorsCnt)}%</Badge>
+			<Badge title="Bad functions." bg="danger fs-6">BAD: {props.stat.bad} | {calcPct(props.stat.bad)}%</Badge>
 			{' '}
-			<Badge title="Missing functions." bg="warning text-dark fs-6">MISS: {missingCnt}| {calcPct(missingCnt)}%</Badge>
+			<Badge title="Missing functions." bg="warning text-dark fs-6">MISS: {props.stat.missing}| {calcPct(props.stat.missing)}%</Badge>
 		</div>
 	);
 }
 
 async function swilibFetcher(params) {
 	let [swilib, summary] = await Promise.all([
-		(await fetch(`http://localhost:4000/functions-phone-${params.model}.json`)).json(),
-		(await fetch(`http://localhost:4000/functions-${params.groupByFile ? 'summary-by-file' : 'summary'}.json`)).json(),
+		(await fetch(`http://localhost:4000/${params.model}.json`)).json(),
+		(await fetch(`http://localhost:4000/summary.json`)).json(),
 	]);
 	return { swilib, summary };
 }
@@ -177,14 +171,38 @@ function SwilibPhone() {
 	let [showEntryOffset, setShowEntryOffset] = createSignal(false);
 	let [showOriginalSymbol, setShowOriginalSymbol] = createSignal(false);
 	let [filterByType, setFilterByType] = createSignal('all');
-	let [apiResult] = createResource(() => ({ model: searchParams.model, groupByFile: groupByFile() }), swilibFetcher);
+	let [apiResult] = createResource(() => ({ model: searchParams.model }), swilibFetcher);
+
+	let summary = createMemo(() => apiResult()?.summary);
+	let swilib = createMemo(() => apiResult()?.swilib.entries);
+	let swilibStat = createMemo(() => apiResult()?.swilib.stat);
 
 	let showBadFunctions = () => {
 		setFilterByType('errors');
 	};
 
+	let functionsByFile = createMemo(() => {
+		if (summary()) {
+			if (groupByFile()) {
+				let result = {};
+				for (let entry of summary().functions) {
+					result[entry.file] = result[entry.file] || [];
+					result[entry.file].push(entry);
+				}
+				return result;
+			} else {
+				return { 'swilib.h': summary().functions };
+			}
+		}
+		return {};
+	});
+
 	return (
 		<>
+			<div class="mb-2">
+				<SwilibPhonesTabs selectedPhone={searchParams.model} />
+			</div>
+
 			<div class="d-flex justify-content-start mb-3">
 				<div class="align-self-center me-3">
 					<Form.Check
@@ -285,26 +303,27 @@ function SwilibPhone() {
 			</Show>
 
 			<Show when={!apiResult.loading && !apiResult.error}>
-				<Show when={Object.keys(apiResult().swilib.errors).length > 0}>
+				<Show when={swilibStat().bad > 0}>
 					<div class="alert alert-danger" role="alert">
-						Swilib has <b>{Object.keys(apiResult().swilib.errors).length}</b> fatal errors!!!
+						Swilib has <b>{swilibStat().bad}</b> fatal errors!!!
 						<Button variant="outline-danger ms-3" size="sm" onClick={showBadFunctions} hidden={filterByType() == 'errors'}>
 							Show bad functions
 						</Button>
 					</div>
 				</Show>
 
-				<SwilibStatistic swilib={apiResult().swilib} />
+				<SwilibStatistic stat={swilibStat()} />
 
-				<For each={Object.keys(apiResult().summary.files)}>{(file) =>
+				<For each={Object.keys(functionsByFile())}>{(file) =>
 					<SwilibTable
 						collapseSignal={globalCollapsed}
 						filterByType={filterByType()}
 						file={file}
-						functions={apiResult().summary.files[file]}
 						showOldNames={showOldNames()}
 						showEntryOffset={showEntryOffset()}
-						swilib={apiResult().swilib}
+						showOriginalSymbol={showOriginalSymbol()}
+						functions={functionsByFile()[file]}
+						swilib={swilib()}
 					/>
 				}</For>
 			</Show>

@@ -2,7 +2,19 @@ function SwilibCoverageValue(props) {
 	if (props.value == null)
 		return <td></td>;
 
-	if (props.value == 100) {
+	if (props.value == 200) {
+		return (
+			<td class="text-center" title={`Function present on all models in ${props.platform} (builtin)`}>
+				<i class="bi bi-check-circle-fill text-info"></i>
+			</td>
+		);
+	} else if (props.value == -200) {
+		return (
+			<td class="text-center" title={`Function not available on all models in ${props.platform}`}>
+				<i class="bi bi-x-circle text-secondary"></i>
+			</td>
+		);
+	} else if (props.value == 100) {
 		return (
 			<td class="text-center" title={`Function present on all models in ${props.platform}`}>
 				<i class="bi bi-check-circle-fill text-success"></i>

@@ -8,12 +8,12 @@ import { getPlatformByPhone, formatId } from '~/swilib';
 import hljs from '~/hljs';
 
 import TableSortButton from '~/components/TableSortButton';
-import SwilibEntryType from "~/components/Swilib/SwilibEntryType";
-import SwilibEntryBadges from "~/components/Swilib/SwilibEntryBadges";
-import SwilibEntryWarnings from "~/components/Swilib/SwilibEntryWarnings";
-import SwilibEntryName from "~/components/Swilib/SwilibEntryName";
-import SwilibCoverageValue from "~/components/Swilib/SwilibCoverageValue";
-import SwilibPhonesTabs from "~/components/Swilib/SwilibPhonesTabs";
+import SwilibEntryType from "~/components/Swilib/EntryType";
+import SwilibEntryBadges from "~/components/Swilib/EntryBadges";
+import SwilibEntryWarnings from "~/components/Swilib/EntryWarnings";
+import SwilibEntryName from "~/components/Swilib/EntryName";
+import SwilibCoverageValue from "~/components/Swilib/CoverageValue";
+import SwilibPhonesTabs from "~/components/Swilib/PhonesTabs";
 
 /*
 TODO:
@@ -129,10 +129,10 @@ function SwilibTableRow(props) {
 						)}
 					</Show>
 				</td>
-				<SwilibCoverageValue value={props.entry.coverage[1]} platform="ELKA" />
-				<SwilibCoverageValue value={props.entry.coverage[2]} platform="NSG" />
-				<SwilibCoverageValue value={props.entry.coverage[3]} platform="X75" />
-				<SwilibCoverageValue value={props.entry.coverage[4]} platform="SG" />
+				<SwilibCoverageValue value={props.entry.coverage[0]} platform="ELKA" />
+				<SwilibCoverageValue value={props.entry.coverage[1]} platform="NSG" />
+				<SwilibCoverageValue value={props.entry.coverage[2]} platform="X75" />
+				<SwilibCoverageValue value={props.entry.coverage[3]} platform="SG" />
 			</tr>
 		</>
 	);
@@ -208,28 +208,34 @@ function SwilibTable(props) {
 	);
 }
 
-async function swilibFetcher(params) {
-	let url = params.groupByFile ? '/functions-summary-by-file.json' : '/functions-summary.json';
-	return (await fetch(`http://localhost:4000${url}`)).json();
-}
-
 function Swilib() {
 	let [groupByFile, setGroupByFile] = createSignal(false);
-	let [apiResult] = createResource(() => ({ groupByFile: groupByFile() }), swilibFetcher);
+	let [apiResult] = createResource(async () => {
+		return (await fetch(`http://localhost:4000/summary.json`)).json();
+	});
 	let [globalCollapsed, setGlobalCollapsed] = createSignal(false);
 	let [showOldNames, setShowOldNames] = createSignal(true);
-	let [phonesList, setPhonesList] = createSignal([]);
 
-	createEffect(() => {
-		if (apiResult()) {
-			setPhonesList(Object.keys(apiResult().functionsByPhone));
+	let functionsByFile = createMemo(() => {
+		if (!apiResult.loading && !apiResult.error) {
+			if (groupByFile()) {
+				let result = {};
+				for (let entry of apiResult().functions) {
+					result[entry.file] = result[entry.file] || [];
+					result[entry.file].push(entry);
+				}
+				return result;
+			} else {
+				return { 'swilib.h': apiResult().functions };
+			}
 		}
+		return {};
 	});
 
 	return <>
 		<div class="mb-3">
 			<div class="mb-2">
-				<SwilibPhonesTabs phones={phonesList()} />
+				<SwilibPhonesTabs />
 			</div>
 
 			<div class="d-flex justify-content-start">
@@ -279,14 +285,14 @@ function Swilib() {
 		<Show when={!apiResult.loading && !apiResult.error}>
 			<div class="alert alert-info" role="alert">
 				Next free ID: <b>{apiResult().nextId.toString(16).padStart(3, '0').toUpperCase()}</b>,
-				last update: <b>{dateFormat(new Date(apiResult().timestamp), 'yyyy-MM-dd HH:mm')}</b>
+				last update: <b>{dateFormat(new Date(apiResult().timestamp || 0), 'yyyy-MM-dd HH:mm')}</b>
 			</div>
 
-			<For each={Object.keys(apiResult().files)}>{(file, id) =>
+			<For each={Object.keys(functionsByFile())}>{(file) =>
 				<SwilibTable
 					collapseSignal={globalCollapsed}
 					file={file}
-					functions={apiResult().files[file]}
+					functions={functionsByFile()[file]}
 					functionsByPhone={apiResult().functionsByPhone}
 					showOldNames={showOldNames()}
 				/>
