@@ -176,6 +176,7 @@ function SwilibPhone() {
 	let summary = createMemo(() => apiResult()?.summary);
 	let swilib = createMemo(() => apiResult()?.swilib.entries);
 	let swilibStat = createMemo(() => apiResult()?.swilib.stat);
+	let swilibPatchId = createMemo(() => apiResult()?.swilib.patchId);
 
 	let showBadFunctions = () => {
 		setFilterByType('errors');
@@ -288,6 +289,29 @@ function SwilibPhone() {
 					checked={filterByType() == 'errors-plus-missing'}
 					onChange={(e) => e.target.checked && setFilterByType(e.target.value)}
 				/>
+			</div>
+
+			<div class="d-flex flex-row mb-3">
+				<Button
+					class="me-3" as="a" variant="outline-success" size="sm" target="_blank" rel="noopener"
+					href="#"
+				>
+					<i class="bi bi-download"></i> Normalized <b>.vkp</b>
+				</Button>
+
+				<Button
+					class="me-3" as="a" variant="outline-success" size="sm" target="_blank" rel="noopener"
+					href="#"
+				>
+					<i class="bi bi-download"></i> Library as <b>swi.blib</b>
+				</Button>
+
+				<Button
+					class="me-3" as="a" variant="outline-primary" size="sm" target="_blank" rel="noopener"
+					href={`https://patches.kibab.com/patches/details.php5?id=${swilibPatchId()}`}
+				>
+					<i class="bi bi-browser-chrome"></i> Open on Kibab
+				</Button>
 			</div>
 
 			<Show when={apiResult.loading}>
