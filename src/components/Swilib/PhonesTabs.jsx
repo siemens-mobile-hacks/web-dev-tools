@@ -1,10 +1,11 @@
 import { createResource } from "solid-js";
+import { SWILIB_TOOLS_API } from "~/utils";
 
 let phonesCache;
 
 async function fetchPhones() {
 	if (!phonesCache)
-		phonesCache = (await fetch(`http://localhost:4000/phones.json`)).json();
+		phonesCache = (await fetch(`${SWILIB_TOOLS_API}/phones.json`)).json();
 	return phonesCache;
 }
 

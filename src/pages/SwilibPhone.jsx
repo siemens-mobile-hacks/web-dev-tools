@@ -12,6 +12,7 @@ import SwilibEntryBadges from "~/components/Swilib/EntryBadges";
 import SwilibEntryWarnings from "~/components/Swilib/EntryWarnings";
 import SwilibEntryName from "~/components/Swilib/EntryName";
 import SwilibPhonesTabs from '~/components/Swilib/PhonesTabs';
+import { SWILIB_TOOLS_API } from '~/utils';
 
 function getRowColor(entry, swilib) {
 	if (swilib[entry.id]?.error)
@@ -157,8 +158,8 @@ function SwilibStatistic(props) {
 
 async function swilibFetcher(params) {
 	let [swilib, summary] = await Promise.all([
-		(await fetch(`http://localhost:4000/${params.model}.json`)).json(),
-		(await fetch(`http://localhost:4000/summary.json`)).json(),
+		(await fetch(`${SWILIB_TOOLS_API}/${params.model}.json`)).json(),
+		(await fetch(`${SWILIB_TOOLS_API}/summary.json`)).json(),
 	]);
 	return { swilib, summary };
 }

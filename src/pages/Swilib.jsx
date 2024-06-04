@@ -14,6 +14,7 @@ import SwilibEntryWarnings from "~/components/Swilib/EntryWarnings";
 import SwilibEntryName from "~/components/Swilib/EntryName";
 import SwilibCoverageValue from "~/components/Swilib/CoverageValue";
 import SwilibPhonesTabs from "~/components/Swilib/PhonesTabs";
+import { SWILIB_TOOLS_API } from "~/utils";
 
 /*
 TODO:
@@ -211,7 +212,7 @@ function SwilibTable(props) {
 function Swilib() {
 	let [groupByFile, setGroupByFile] = createSignal(false);
 	let [apiResult] = createResource(async () => {
-		return (await fetch(`http://localhost:4000/summary.json`)).json();
+		return (await fetch(`${SWILIB_TOOLS_API}/summary.json`)).json();
 	});
 	let [globalCollapsed, setGlobalCollapsed] = createSignal(false);
 	let [showOldNames, setShowOldNames] = createSignal(true);
