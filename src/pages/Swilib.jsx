@@ -287,7 +287,7 @@ function Swilib() {
 		</div>
 
 		<div class="d-flex flex-row mb-3">
-			<span class="me-3"><i class="bi bi-funnel"></i> Show coverage:</span>
+			<span class="me-3"><i class="bi bi-globe"></i> Show coverage:</span>
 			<Form.Check
 				inline
 				type="radio"
@@ -324,8 +324,7 @@ function Swilib() {
 
 		<Show when={!apiResult.loading && !apiResult.error}>
 			<div class="alert alert-info" role="alert">
-				Next free ID: <b>{apiResult().nextId.toString(16).padStart(3, '0').toUpperCase()}</b>,
-				last update: <b>{dateFormat(new Date(apiResult().timestamp || 0), 'yyyy-MM-dd HH:mm')}</b>
+				Next free ID: <b>{apiResult().nextId.toString(16).padStart(3, '0').toUpperCase()}</b>
 			</div>
 
 			<For each={Object.keys(functionsByFile())}>{(file) =>
