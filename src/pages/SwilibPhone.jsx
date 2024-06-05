@@ -118,7 +118,13 @@ function SwilibTable(props) {
 		if (props.filterByType == 'errors') {
 			newFunctions = newFunctions.filter((entry) => props.swilib[entry.id]?.error != null);
 		} else if (props.filterByType == 'errors-plus-missing') {
-			newFunctions = newFunctions.filter((entry) => props.swilib[entry.id]?.error != null || props.swilib[entry.id]?.value == null);
+			newFunctions = newFunctions.filter((entry) => {
+				if (props.swilib[entry.id]?.error)
+					return true;
+				if (props.swilib[entry.id]?.value == null && !(entry.flags & SwiFlags.BUILTIN) && entry.name != null)
+					return true;
+				return false;
+			});
 		}
 
 		return newFunctions;
