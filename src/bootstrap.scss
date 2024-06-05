@@ -1,0 +1,175 @@
+// 1. Include functions first (so you can manipulate colors, SVGs, calc, etc)
+@import "../node_modules/bootstrap/scss/functions";
+
+// 2. Include any default variable overrides here
+$info:      #0aa7c7;
+
+// 3. Include remainder of required Bootstrap stylesheets (including any separate color mode stylesheets)
+@import "../node_modules/bootstrap/scss/variables";
+@import "../node_modules/bootstrap/scss/variables-dark";
+
+// 4. Include any default map overrides here
+
+// 5. Include remainder of required parts
+@import "../node_modules/bootstrap/scss/maps";
+@import "../node_modules/bootstrap/scss/mixins";
+@import "../node_modules/bootstrap/scss/utilities";
+
+// 6. Optionally include any other parts as needed
+@import "../node_modules/bootstrap/scss/root";
+@import "../node_modules/bootstrap/scss/reboot";
+@import "../node_modules/bootstrap/scss/type";
+@import "../node_modules/bootstrap/scss/images";
+@import "../node_modules/bootstrap/scss/containers";
+@import "../node_modules/bootstrap/scss/grid";
+@import "../node_modules/bootstrap/scss/tables";
+@import "../node_modules/bootstrap/scss/forms";
+@import "../node_modules/bootstrap/scss/buttons";
+@import "../node_modules/bootstrap/scss/transitions";
+@import "../node_modules/bootstrap/scss/dropdown";
+@import "../node_modules/bootstrap/scss/button-group";
+@import "../node_modules/bootstrap/scss/nav";
+@import "../node_modules/bootstrap/scss/navbar";
+@import "../node_modules/bootstrap/scss/card";
+@import "../node_modules/bootstrap/scss/accordion";
+@import "../node_modules/bootstrap/scss/breadcrumb";
+@import "../node_modules/bootstrap/scss/pagination";
+@import "../node_modules/bootstrap/scss/badge";
+@import "../node_modules/bootstrap/scss/alert";
+@import "../node_modules/bootstrap/scss/progress";
+@import "../node_modules/bootstrap/scss/list-group";
+@import "../node_modules/bootstrap/scss/close";
+@import "../node_modules/bootstrap/scss/toasts";
+@import "../node_modules/bootstrap/scss/modal";
+@import "../node_modules/bootstrap/scss/tooltip";
+@import "../node_modules/bootstrap/scss/popover";
+@import "../node_modules/bootstrap/scss/carousel";
+@import "../node_modules/bootstrap/scss/spinners";
+@import "../node_modules/bootstrap/scss/offcanvas";
+@import "../node_modules/bootstrap/scss/placeholders";
+@import "../node_modules/bootstrap/scss/helpers";
+
+// 7. Optionally include utilities API last to generate classes based on the Sass map in `_utilities.scss`
+@import "../node_modules/bootstrap/scss/utilities/api";
+
+// 8. Add additional custom code here
+body {
+	overflow-y: scroll;
+}
+
+.table-sticky-header {
+	thead {
+		position: sticky;
+		top: -1px;
+	}
+
+	thead {
+		box-shadow: 0px 1px 0px var(--bs-table-border-color);
+	}
+
+	th {
+		background-color: var(--bs-tertiary-bg);
+	}
+}
+
+.table-sort-btn {
+	cursor: pointer;
+	user-select: none;
+}
+
+/* Dark theme fixes */
+@include color-mode(dark) {
+	/* Fix text colors */
+	--bs-info-rgb: 8, 135, 160;
+	--bs-danger-rgb: 224, 82, 96;
+	--bs-primary-rgb: 109, 167, 254;
+	--bs-info-rgb: 11, 171, 203;
+	--bs-success-rgb: 32, 172, 107;
+
+	/* Fix table rows */
+	.table-danger {
+		--bs-table-color: var(--bs-body-color);
+		--bs-table-bg: var(--bs-danger-bg-subtle);
+		--bs-table-border-color: var(--bs-danger-border-subtle);
+		--bs-table-striped-bg: #25090b;
+		--bs-table-striped-color: var(--bs-body-color);
+		--bs-table-active-bg: #411014;
+		--bs-table-active-color: var(--bs-body-color);
+		--bs-table-hover-bg: #411014;
+		--bs-table-hover-color: var(--bs-body-color);
+		color: var(--bs-table-color);
+		border-color: rgba(255, 255, 255, 0.2);
+	}
+
+	.table-warning {
+		--bs-table-color: var(--bs-body-color);
+		--bs-table-bg: var(--bs-warning-bg-subtle);
+		--bs-table-border-color: var(--bs-warning-border-subtle);
+		--bs-table-striped-bg: #2d2301;
+		--bs-table-striped-color: var(--bs-body-color);
+		--bs-table-active-bg: #413201;
+		--bs-table-active-color: var(--bs-body-color);
+		--bs-table-hover-bg: #413201;
+		--bs-table-hover-color: var(--bs-body-color);
+		color: var(--bs-table-color);
+		border-color: rgba(255, 255, 255, 0.2);
+	}
+
+	.table-info {
+		--bs-table-color: var(--bs-body-color);
+		--bs-table-bg: var(--bs-info-bg-subtle);
+		--bs-table-border-color: var(--bs-info-border-subtle);
+		--bs-table-striped-bg: #03242b;
+		--bs-table-striped-color: var(--bs-body-color);
+		--bs-table-active-bg: #05343e;
+		--bs-table-active-color: var(--bs-body-color);
+		--bs-table-hover-bg: #05343e;
+		--bs-table-hover-color: var(--bs-body-color);
+		color: var(--bs-table-color);
+		border-color: rgba(255, 255, 255, 0.2);
+	}
+
+	/* Fix outline buttons */
+	.btn-outline-primary {
+		--bs-btn-color: rgb(var(--bs-primary-rgb));
+		--bs-btn-border-color: rgb(var(--bs-primary-rgb));
+	}
+
+	.btn-outline-secondary {
+		--bs-btn-color: rgb(var(--bs-secondary-rgb));
+		--bs-btn-border-color: rgb(var(--bs-secondary-rgb));
+	}
+
+	.btn-outline-success {
+		--bs-btn-color: rgb(var(--bs-success-rgb));
+		--bs-btn-border-color: rgb(var(--bs-success-rgb));
+	}
+
+	.btn-outline-info {
+		--bs-btn-color: rgb(var(--bs-info-rgb));
+		--bs-btn-border-color: rgb(var(--bs-info-rgb));
+	}
+
+	.btn-outline-danger {
+		--bs-btn-color: rgb(var(--bs-danger-rgb));
+		--bs-btn-border-color: rgb(var(--bs-danger-rgb));
+	}
+
+	.btn-outline-warning {
+		--bs-btn-color: rgb(var(--bs-warning-rgb));
+		--bs-btn-border-color: rgb(var(--bs-warning-rgb));
+	}
+
+	/* Fix bg colors */
+	.bg-success {
+		--bs-success-rgb: 23, 125, 77;
+	}
+
+	.bg-info {
+		--bs-info-rgb: 8, 131, 150;
+	}
+
+	.bg-danger {
+		--bs-danger-rgb: 157, 67, 76;
+	}
+}

@@ -4,9 +4,8 @@ import { render } from 'solid-js/web';
 import { Router, Route, Navigate } from "@solidjs/router";
 import App from './pages/App';
 
-import 'bootstrap/dist/css/bootstrap.min.css';
+import "./bootstrap.scss";
 import "bootstrap-icons/font/bootstrap-icons.css";
-import './index.scss';
 
 const Swilib = lazy(() => import("./pages/Swilib"));
 const SwilibPhone = lazy(() => import("./pages/SwilibPhone"));

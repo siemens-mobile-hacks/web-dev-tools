@@ -96,9 +96,7 @@ function SwilibTableRow(props) {
 						{props.swilib[props.entry.id].value.toString(16).padStart(8, '0').toUpperCase()}
 					</Show>
 				</td>
-				<td classList={{ 'text-muted': props.entry.name == null }}>
-					<SwilibCoverageValue value={props.entry.ptrCoverage[platformToIndex(props.platform)]} platform={props.platform} />
-				</td>
+				<SwilibCoverageValue value={props.entry.ptrCoverage[platformToIndex(props.platform)]} platform={props.platform} />
 			</tr>
 		</>
 	);
