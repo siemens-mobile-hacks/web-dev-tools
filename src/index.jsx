@@ -13,6 +13,7 @@ const SwilibPhone = lazy(() => import("./pages/SwilibPhone"));
 
 let dispose = render(() => (
 	<Router root={App} base={import.meta.env.BASE_URL}>
+		<Route path="/" component={() => <Navigate href={() => "/swilib"} />} />
 		<Route path="/swilib" component={Swilib} />
 		<Route path="/swilib/phone" component={SwilibPhone} />
 	</Router>

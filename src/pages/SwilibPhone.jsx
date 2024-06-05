@@ -1,5 +1,5 @@
 import { createResource, createSignal, createMemo, createEffect, on } from 'solid-js';
-import { useSearchParams } from '@solidjs/router';
+import { A, useSearchParams } from '@solidjs/router';
 import { Spinner } from 'solid-bootstrap';
 import { Form } from 'solid-bootstrap';
 import { Button } from 'solid-bootstrap';
@@ -13,23 +13,47 @@ import SwilibEntryWarnings from "~/components/Swilib/EntryWarnings";
 import SwilibEntryName from "~/components/Swilib/EntryName";
 import SwilibPhonesTabs from '~/components/Swilib/PhonesTabs';
 import { SWILIB_TOOLS_API } from '~/utils';
+import { createStoredSignal } from '~/storage';
+import SwilibCoverageValue from '~/components/Swilib/CoverageValue';
 
-function getRowColor(entry, swilib) {
+function platformToIndex(platform) {
+	switch (platform) {
+		case "ELKA":	return 0;
+		case "NSG":		return 1;
+		case "X75":		return 2;
+		case "SG":		return 3;
+	}
+	return -1;
+}
+
+function getRowColor(entry, swilib, platform) {
+	// Color by error
 	if (swilib[entry.id]?.error)
 		return 'table-danger';
+
+	// Unused function
 	if (entry.name == null)
 		return '';
-	if ((entry.flags & SwiFlags.BUILTIN))
+
+	// Color by coverage
+	let coverage = entry.coverage[platformToIndex(platform)];
+	if (coverage === 200) {
 		return 'table-info';
+	} else if (coverage === -200) {
+		return 'text-decoration-line-through';
+	}
+
+	// Missing function
 	if (swilib[entry.id]?.value == null)
 		return 'table-warning';
+
 	return '';
 }
 
 function SwilibTableRow(props) {
 	return (
 		<>
-			<tr class={getRowColor(props.entry, props.swilib)}>
+			<tr class={getRowColor(props.entry, props.swilib, props.platform)}>
 				<td classList={{ 'text-muted': props.entry.name == null }}>
 					{formatId(props.entry.id)}
 				</td>
@@ -72,14 +96,17 @@ function SwilibTableRow(props) {
 						{props.swilib[props.entry.id].value.toString(16).padStart(8, '0').toUpperCase()}
 					</Show>
 				</td>
+				<td classList={{ 'text-muted': props.entry.name == null }}>
+					<SwilibCoverageValue value={props.entry.ptrCoverage[platformToIndex(props.platform)]} platform={props.platform} />
+				</td>
 			</tr>
 		</>
 	);
 }
 
 function SwilibTable(props) {
-	let [tableIdSort, setTableIdSort] = createSignal('ASC');
-	let [isHidden, setIsHidden] = createSignal(false);
+	let [tableIdSort, setTableIdSort] = createStoredSignal(`swilib-table-sort-${props.file}`, 'ASC');
+	let [isHidden, setIsHidden] = createStoredSignal(`swilib-table-hidden-${props.file}`, false);
 
 	let functions = createMemo(() => {
 		let sortAsc = tableIdSort() == 'ASC';
@@ -125,6 +152,9 @@ function SwilibTable(props) {
 						<th class="text-center">
 							<small>Value</small>
 						</th>
+						<th class="text-center">
+							<small>PTR</small>
+						</th>
 					</tr>
 				</thead>
 				<tbody>
@@ -135,6 +165,7 @@ function SwilibTable(props) {
 							showEntryOffset={props.showEntryOffset}
 							showOriginalSymbol={props.showOriginalSymbol}
 							swilib={props.swilib}
+							platform={props.platform}
 						/>
 					}</For>
 				</tbody>
@@ -166,18 +197,19 @@ async function swilibFetcher(params) {
 
 function SwilibPhone() {
 	let [searchParams] = useSearchParams();
-	let [groupByFile, setGroupByFile] = createSignal(false);
+	let [groupByFile, setGroupByFile] = createStoredSignal('group-by-file', false);
 	let [globalCollapsed, setGlobalCollapsed] = createSignal(false);
-	let [showOldNames, setShowOldNames] = createSignal(true);
-	let [showEntryOffset, setShowEntryOffset] = createSignal(false);
-	let [showOriginalSymbol, setShowOriginalSymbol] = createSignal(false);
-	let [filterByType, setFilterByType] = createSignal('all');
+	let [showOldNames, setShowOldNames] = createStoredSignal('show-old-names', true);
+	let [showEntryOffset, setShowEntryOffset] = createStoredSignal('show-entry-offset', false);
+	let [showOriginalSymbol, setShowOriginalSymbol] = createStoredSignal('show-original-symbol', false);
+	let [filterByType, setFilterByType] = createStoredSignal('filter-by-errors', 'all');
 	let [apiResult] = createResource(() => ({ model: searchParams.model }), swilibFetcher);
 
 	let summary = createMemo(() => apiResult()?.summary);
 	let swilib = createMemo(() => apiResult()?.swilib.entries);
 	let swilibStat = createMemo(() => apiResult()?.swilib.stat);
 	let swilibPatchId = createMemo(() => apiResult()?.swilib.patchId);
+	let platform = createMemo(() => apiResult()?.swilib.platform);
 
 	let showBadFunctions = () => {
 		setFilterByType('errors');
@@ -294,21 +326,21 @@ function SwilibPhone() {
 
 			<div class="d-flex flex-row mb-3">
 				<Button
-					class="me-3" as="a" variant="outline-success" size="sm" target="_blank" rel="noopener"
-					href="#"
+					class="me-3" as={A} variant="outline-success" size="sm"
+					href={`${SWILIB_TOOLS_API}/${searchParams.model}.vkp`}
 				>
 					<i class="bi bi-download"></i> Normalized <b>.vkp</b>
 				</Button>
 
 				<Button
-					class="me-3" as="a" variant="outline-success" size="sm" target="_blank" rel="noopener"
-					href="#"
+					class="me-3" as={A} variant="outline-success" size="sm"
+					href={`${SWILIB_TOOLS_API}/${searchParams.model}.blib`}
 				>
 					<i class="bi bi-download"></i> Library as <b>swi.blib</b>
 				</Button>
 
 				<Button
-					class="me-3" as="a" variant="outline-primary" size="sm" target="_blank" rel="noopener"
+					class="me-3" as={A} variant="outline-primary" size="sm" target="_blank" rel="noopener"
 					href={`https://patches.kibab.com/patches/details.php5?id=${swilibPatchId()}`}
 				>
 					<i class="bi bi-browser-chrome"></i> Open on Kibab
@@ -349,6 +381,7 @@ function SwilibPhone() {
 						showOriginalSymbol={showOriginalSymbol()}
 						functions={functionsByFile()[file]}
 						swilib={swilib()}
+						platform={platform()}
 					/>
 				}</For>
 			</Show>

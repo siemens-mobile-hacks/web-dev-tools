@@ -19,12 +19,11 @@ function Header() {
 	return (
 		<Navbar expand="lg" class="bg-body-tertiary">
 			<Container xxl>
-				<Navbar.Brand href="/">Dev Tools</Navbar.Brand>
+				<Navbar.Brand as={A} href="/">Dev Tools</Navbar.Brand>
 				<Navbar.Toggle aria-controls="basic-navbar-nav" />
 				<Navbar.Collapse id="basic-navbar-nav">
 					<Nav class="me-auto">
 						<HeaderLink href="/swilib"><i class="bi bi-box-fill"></i> Swilib</HeaderLink>
-						<HeaderLink href="/patterns"><i class="bi bi-search"></i> Patterns</HeaderLink>
 						<HeaderLink href="/re"><i class="bi bi-hammer"></i> RE files</HeaderLink>
 					</Nav>
 				</Navbar.Collapse>

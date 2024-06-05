@@ -15,15 +15,7 @@ import SwilibEntryName from "~/components/Swilib/EntryName";
 import SwilibCoverageValue from "~/components/Swilib/CoverageValue";
 import SwilibPhonesTabs from "~/components/Swilib/PhonesTabs";
 import { SWILIB_TOOLS_API } from "~/utils";
-
-/*
-TODO:
-1. group by categories
-2. show function brief by click
-3. per-model table + errors
-4. patterns table
-5. files for RE
-*/
+import { createStoredSignal } from "~/storage";
 
 function SwilibEntryCoverageMatrix(props) {
 	let phonesByPlatform = {};
@@ -67,6 +59,25 @@ function SwilibEntryCoverageMatrix(props) {
 	);
 }
 
+function SwilibEntryPatterns(props) {
+	return (
+		<table class="table table-bordered table-hover" style="width: auto">
+			<tbody>
+				<For each={["ELKA", "NSG", "X75", "SG"]}>{(platform, index) =>
+					<tr>
+						<th class="align-middle">{platform}</th>
+						<td>
+							<code style="word-break: break-all">
+								{props.patterns[index()] || <span class="text-muted">/* no pattern */</span>}
+							</code>
+						</td>
+					</tr>
+				}</For>
+			</tbody>
+		</table>
+	);
+}
+
 function SwilibEntryInfo(props) {
 	let [showModal, setShowModal] = createSignal(true);
 	return (
@@ -89,17 +100,19 @@ function SwilibEntryInfo(props) {
 						{' '} {props.entry.aliases.join(', ')}
 					</div>
 				</Show>
-				<Show when={props.entry.name}>
-					<div class="mt-3">
-						<SwilibEntryCoverageMatrix id={props.entry.id} functionsByPhone={props.functionsByPhone} />
-					</div>
-				</Show>
+				<div class="mt-3">
+					<SwilibEntryCoverageMatrix id={props.entry.id} functionsByPhone={props.functionsByPhone} />
+				</div>
+			<div class="mt-3">
+					<SwilibEntryPatterns patterns={props.entry.patterns} />
+				</div>
 			</Modal.Body>
 		</Modal>
 	);
 }
 
 function SwilibTableRow(props) {
+	let coverage = createMemo(() => props.coverageType == 'PTR' ? props.entry.ptrCoverage : props.entry.coverage);
 	return (
 		<>
 			<tr
@@ -130,18 +143,18 @@ function SwilibTableRow(props) {
 						)}
 					</Show>
 				</td>
-				<SwilibCoverageValue value={props.entry.coverage[0]} platform="ELKA" />
-				<SwilibCoverageValue value={props.entry.coverage[1]} platform="NSG" />
-				<SwilibCoverageValue value={props.entry.coverage[2]} platform="X75" />
-				<SwilibCoverageValue value={props.entry.coverage[3]} platform="SG" />
+				<SwilibCoverageValue value={coverage()[0]} platform="ELKA" />
+				<SwilibCoverageValue value={coverage()[1]} platform="NSG" />
+				<SwilibCoverageValue value={coverage()[2]} platform="X75" />
+				<SwilibCoverageValue value={coverage()[3]} platform="SG" />
 			</tr>
 		</>
 	);
 }
 
 function SwilibTable(props) {
-	let [tableIdSort, setTableIdSort] = createSignal('ASC');
-	let [isHidden, setIsHidden] = createSignal(false);
+	let [tableIdSort, setTableIdSort] = createStoredSignal(`swilib-table-sort-${props.file}`, 'ASC');
+	let [isHidden, setIsHidden] = createStoredSignal(`swilib-table-hidden-${props.file}`, false);
 	let [entryInfo, setEntryInfo] = createSignal(false);
 
 	let functions = createMemo(() => {
@@ -193,6 +206,7 @@ function SwilibTable(props) {
 							entry={row}
 							onOpenEntryInfo={onOpenEntryInfo}
 							showOldNames={props.showOldNames}
+							coverageType={props.coverageType}
 						/>
 					}</For>
 				</tbody>
@@ -210,12 +224,13 @@ function SwilibTable(props) {
 }
 
 function Swilib() {
-	let [groupByFile, setGroupByFile] = createSignal(false);
+	let [groupByFile, setGroupByFile] = createStoredSignal('group-by-file', false);
 	let [apiResult] = createResource(async () => {
 		return (await fetch(`${SWILIB_TOOLS_API}/summary.json`)).json();
 	});
 	let [globalCollapsed, setGlobalCollapsed] = createSignal(false);
-	let [showOldNames, setShowOldNames] = createSignal(true);
+	let [showOldNames, setShowOldNames] = createStoredSignal('show-old-names', true);
+	let [coverageType, setCoverageType] = createStoredSignal('coverage-type', 'SWI');
 
 	let functionsByFile = createMemo(() => {
 		if (!apiResult.loading && !apiResult.error) {
@@ -271,6 +286,30 @@ function Swilib() {
 			</div>
 		</div>
 
+		<div class="d-flex flex-row mb-3">
+			<span class="me-3"><i class="bi bi-funnel"></i> Show coverage:</span>
+			<Form.Check
+				inline
+				type="radio"
+				id="coverage-type-swi"
+				name="coverage-type"
+				label="For swilib"
+				value="SWI"
+				checked={coverageType() == 'SWI'}
+				onChange={(e) => e.target.checked && setCoverageType(e.target.value)}
+			/>
+			<Form.Check
+				inline
+				type="radio"
+				id="coverage-type-ptr"
+				name="coverage-type"
+				label="For patterns"
+				value="PTR"
+				checked={coverageType() == 'PTR'}
+				onChange={(e) => e.target.checked && setCoverageType(e.target.value)}
+			/>
+		</div>
+
 		<Show when={apiResult.loading}>
 			<Spinner animation="border" role="status">
 				<span className="visually-hidden">Loading...</span>
@@ -296,6 +335,7 @@ function Swilib() {
 					functions={functionsByFile()[file]}
 					functionsByPhone={apiResult().functionsByPhone}
 					showOldNames={showOldNames()}
+					coverageType={coverageType()}
 				/>
 			}</For>
 		</Show>

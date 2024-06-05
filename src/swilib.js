@@ -8,9 +8,7 @@ export const SwiType = {
 export const SwiFlags = {
 	BUILTIN:		1 << 0,
 	FROM_PATCH:		1 << 1,
-	THUMB:			1 << 2,
-	STUB:			1 << 3,
-	HALF_BUILTIN:	1 << 4,
+	DIRTY:			1 << 2,
 };
 
 export function formatId(id) {
