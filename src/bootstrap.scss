@@ -129,6 +129,20 @@ body {
 		border-color: rgba(255, 255, 255, 0.2);
 	}
 
+	.table-success {
+		--bs-table-color: var(--bs-body-color);
+		--bs-table-bg: var(--bs-success-bg-subtle);
+		--bs-table-border-color: var(--bs-success-border-subtle);
+		--bs-table-striped-bg: #04160e;
+		--bs-table-striped-color: var(--bs-body-color);
+		--bs-table-active-bg: #072719;
+		--bs-table-active-color: var(--bs-body-color);
+		--bs-table-hover-bg: #072719;
+		--bs-table-hover-color: var(--bs-body-color);
+		color: var(--bs-table-color);
+		border-color: rgba(255, 255, 255, 0.2);
+	}
+
 	/* Fix outline buttons */
 	.btn-outline-primary {
 		--bs-btn-color: rgb(var(--bs-primary-rgb));

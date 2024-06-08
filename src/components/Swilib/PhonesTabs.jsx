@@ -4,7 +4,7 @@ import { SWILIB_TOOLS_API } from "~/utils";
 
 let phonesCache;
 
-async function fetchPhones() {
+export async function fetchPhones() {
 	if (!phonesCache)
 		phonesCache = (await fetch(`${SWILIB_TOOLS_API}/phones.json`)).json();
 	return phonesCache;

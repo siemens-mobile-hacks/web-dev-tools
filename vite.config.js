@@ -5,6 +5,7 @@ import path from 'path';
 import fs from 'fs';
 
 const ROUTES = [
+	`/re`,
 	`/swilib`,
 	`/swilib/phone`,
 ];

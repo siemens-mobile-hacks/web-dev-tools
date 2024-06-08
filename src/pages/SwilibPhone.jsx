@@ -151,7 +151,9 @@ function SwilibTable(props) {
 							<small>Function</small>
 						</th>
 						<th class="text-center" hidden={!props.showOriginalSymbol}>
-							<small>Name in VKP</small>
+							<small>
+								<nobr>Name in VKP</nobr>
+							</small>
 						</th>
 						<th class="text-center">
 							<small>Value</small>
