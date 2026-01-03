@@ -1,7 +1,5 @@
 /* @refresh reload */
-import "./bootstrap.scss";
-import "bootstrap-icons/font/bootstrap-icons.css";
-import "./hljs.scss";
+import "./index.scss";
 import { render } from "solid-js/web";
 import { Root } from "@/components/Layout/Root.js";
 

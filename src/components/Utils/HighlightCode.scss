@@ -1,5 +1,5 @@
 $color-mode-type: data;
-@import "../node_modules/bootstrap/scss/mixins";
+@import "../../../node_modules/bootstrap/scss/mixins";
 
 @include color-mode(dark) {
 	/*!

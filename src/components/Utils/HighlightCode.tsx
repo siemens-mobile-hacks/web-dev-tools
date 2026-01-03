@@ -1,3 +1,4 @@
+import './HighlightCode.scss';
 import { Component, ComponentProps, createMemo, splitProps } from "solid-js";
 import hljs from 'highlight.js/lib/core';
 import hljsLangC from 'highlight.js/lib/languages/c';
