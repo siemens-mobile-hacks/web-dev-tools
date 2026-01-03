@@ -11,7 +11,7 @@ export const SwilibEntryWarnings: Component<SwilibEntryWarningsProps> = (props) 
 			<Show when={props.value & SwilibEntryFlags.FROM_PATCH}>
 				<span class="text-danger">
 					<i class="bi bi-exclamation-triangle"></i>
-					Function from patch. Don't use in ELF's!
+					Function from patch. Don't use in ELFs!
 				</span>
 			</Show>
 

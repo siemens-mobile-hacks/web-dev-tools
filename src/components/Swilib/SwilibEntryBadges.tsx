@@ -11,7 +11,7 @@ export const SwilibEntryBadges: Component<SwilibEntryBadgesProps> = (props) => {
 			<Show when={props.value & SwilibEntryFlags.FROM_PATCH}>
 				<span
 					class="badge small rounded-pill bg-danger"
-					title="Function from patch. Don't use in the ELF's!"
+					title="Function from patch. Don't use in ELFs!"
 				>
 					PATCH
 				</span>

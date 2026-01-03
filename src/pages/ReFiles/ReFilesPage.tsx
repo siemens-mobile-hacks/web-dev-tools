@@ -22,12 +22,12 @@ const ReFilesPage: Component = () => {
 
 		<Show when={response.error}>
 			<div class="alert alert-danger" role="alert">
-				Can't load data from the server. Please, reload the page.
+				Can't load data from the server. Please reload the page.
 			</div>
 		</Show>
 
 		<Show when={response()}>{(response) => <>
-			<h5>Swilib data types for dissasembler</h5>
+			<h5>Swilib data types for disassembler</h5>
 			<table class="table table-bordered table-hover" style={{width: "auto"}}>
 				<thead>
 				<tr>
@@ -59,7 +59,7 @@ const ReFilesPage: Component = () => {
 				</tbody>
 			</table>
 
-			<h5>Firmware symbols for dissasembler</h5>
+			<h5>Firmware symbols for disassembler</h5>
 
 			<div class="text-info mb-3">
 				<i class="bi bi-info-circle"></i> {' '}

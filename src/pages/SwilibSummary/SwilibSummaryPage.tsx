@@ -30,7 +30,7 @@ const SwilibSummaryPage: Component = () => {
 					<Form.Check
 						type="checkbox"
 						id="group-by-c-header"
-						label="Group by C-header"
+						label="Group by C header"
 						checked={tableOptions.groupByFile}
 						onChange={(e) => setTableOptions("groupByFile", e.currentTarget.checked)}
 					/>
@@ -89,7 +89,7 @@ const SwilibSummaryPage: Component = () => {
 
 		<Show when={response.error}>
 			<div class="alert alert-danger" role="alert">
-				Can't load data from the server. Please, reload the page.
+				Can't load data from the server. Please reload the page.
 			</div>
 		</Show>
 
