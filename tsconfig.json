@@ -9,8 +9,10 @@
 		"lib": [
 			"ESNext",
 			"DOM",
-			"DOM.Iterable"
+			"DOM.Iterable",
+			"DOM.AsyncIterable"
 		],
+		"target": "ESNext",
 		"module": "ESNext",
 		"moduleResolution": "bundler",
 		"noEmit": true,
@@ -26,11 +28,9 @@
 		"resolveJsonModule": true,
 		"skipLibCheck": true,
 		"strict": true,
-		"target": "ESNext",
 		"types": [
 			"vite-plugin-solid-svg/types-component-solid",
-			"vite/client",
-			"@types/w3c-web-serial"
+			"vite/client"
 		]
 	},
 	"include": [

@@ -57,6 +57,10 @@ body {
 	overflow-y: scroll;
 }
 
+.form-check {
+	user-select: none;
+}
+
 .table-sticky-header {
 	thead {
 		position: sticky;
@@ -64,7 +68,7 @@ body {
 	}
 
 	thead {
-		box-shadow: 0px 1px 0px var(--bs-table-border-color);
+		box-shadow: 0 1px 0 var(--bs-table-border-color);
 	}
 
 	th {
@@ -77,10 +81,13 @@ body {
 	user-select: none;
 }
 
+.cursor-pointer {
+	cursor: pointer;
+}
+
 /* Dark theme fixes */
 @include color-mode(dark) {
 	/* Fix text colors */
-	--bs-info-rgb: 8, 135, 160;
 	--bs-danger-rgb: 224, 82, 96;
 	--bs-primary-rgb: 109, 167, 254;
 	--bs-info-rgb: 11, 171, 203;

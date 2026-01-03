@@ -1,24 +1,25 @@
+import { ParentProps, Component } from "solid-js";
 import { A, useMatch } from "@solidjs/router";
 
 import { Container } from 'solid-bootstrap';
 import { Navbar } from 'solid-bootstrap';
 import { Nav } from 'solid-bootstrap';
 
-import { resolveURL } from '~/utils';
+import { resolveURL } from '@/utils';
 
-function HeaderLink(props) {
-	let match = useMatch(() => resolveURL(props.href));
+const HeaderLink: Component<ParentProps<{ href: string }>> = (props) => {
+	const match = useMatch(() => resolveURL(props.href));
 	return (
 		<Nav.Link as={A} {...props} active={!!match()}>
 			{props.children}
 		</Nav.Link>
 	);
-}
+};
 
-function Header() {
+export const Header: Component = () => {
 	return (
 		<Navbar expand="lg" class="bg-body-tertiary">
-			<Container xxl>
+			<Container fluid="xxl">
 				<Navbar.Brand as={A} href="/">Dev Tools</Navbar.Brand>
 				<Navbar.Toggle aria-controls="basic-navbar-nav" />
 				<Navbar.Collapse id="basic-navbar-nav">
@@ -30,6 +31,4 @@ function Header() {
 			</Container>
 		</Navbar>
 	);
-}
-
-export default Header;
+};

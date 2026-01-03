@@ -1,7 +1,5 @@
 import { defineConfig, Plugin } from 'vite';
 import solidPlugin from 'vite-plugin-solid';
-import suidPlugin from "@suid/vite-plugin";
-import { nodePolyfills } from 'vite-plugin-node-polyfills';
 import solidSvg from 'vite-plugin-solid-svg'
 import tsconfigPaths from 'vite-tsconfig-paths';
 import path from 'node:path';
@@ -45,13 +43,18 @@ function postBuildPlugin(): Plugin {
 export default defineConfig({
 	worker: {
 		format: 'es',
-		plugins: () => [ tsconfigPaths(), nodePolyfills() ]
+		plugins: () => [ tsconfigPaths() ]
+	},
+	css: {
+		preprocessorOptions: {
+			scss: {
+				silenceDeprecations: ["import", "color-functions", "global-builtin", "if-function"]
+			},
+		}
 	},
 	plugins: [
-		suidPlugin(),
 		solidPlugin(),
 		tsconfigPaths(),
-		nodePolyfills(),
 		postBuildPlugin(),
 		solidSvg({
 			 defaultAsComponent: true,
@@ -73,14 +76,7 @@ export default defineConfig({
 		 }),
 	],
 	optimizeDeps: {
-		exclude: [
-			'siemens-sms-parser',
-			'@sie-js/creampie',
-			'@sie-js/libffshit',
-			'@ffmpeg/util',
-			'@ffmpeg/ffmpeg',
-			'@ffmpeg/core',
-		],
+		exclude: [],
 	},
 	server: {
 		port: 3000,

@@ -1,0 +1,54 @@
+import { Component, createMemo, For, Show } from "solid-js";
+import { SwilibEntryTypeBadge } from "@/components/Swilib/SwilibEntryTypeBadge";
+import { SwilibEntryName } from "@/components/Swilib/SwilibEntryName";
+import { SwilibEntryBadges } from "@/components/Swilib/SwilibEntryBadges";
+import { SwilibCoverageValue } from "@/components/Swilib/SwilibCoverageValue";
+import { getPatternsCoverage, SummarySwilibAnalysisEntry, SWILIB_PLATFORMS } from "@/api/swilib";
+import { useSwilibTableOptionsStore } from "@/store/swilibTableOptionsStore";
+import { formatId } from "@/utils/format";
+
+interface SwilibTableRowProps {
+	entry: SummarySwilibAnalysisEntry;
+	onSelect?: (entry: SummarySwilibAnalysisEntry) => void;
+}
+
+export const SwilibTableRow: Component<SwilibTableRowProps> = (props) => {
+	const [tableOptions] = useSwilibTableOptionsStore();
+	const coverage = createMemo(() => {
+		if (tableOptions.coverageType == 'PTR')
+			return getPatternsCoverage(props.entry.patterns, props.entry.coverage);
+		return props.entry.coverage;
+	});
+
+	return (
+		<tr class="cursor-pointer" onClick={() => props.onSelect?.(props.entry)}>
+			<td classList={{'text-muted': props.entry.name == null}}>
+				{formatId(props.entry.id)}
+			</td>
+
+			<td classList={{'text-muted': props.entry.name == null}}>
+				<div class="d-flex justify-content-between align-items-center">
+					<div>
+						<SwilibEntryTypeBadge value={props.entry.type}/>
+						&nbsp;&nbsp;
+						<SwilibEntryName signature={props.entry.name}/>
+					</div>
+					<SwilibEntryBadges value={props.entry.flags}/>
+				</div>
+				<Show when={tableOptions.showOldNames}>{props.entry.aliases.map((aliasName) =>
+					<div>
+						<i class="bi bi-info-square"></i>
+						&nbsp;&nbsp;
+						<small class="text-muted">Old name:</small>
+						&nbsp;
+						<small>{aliasName}</small>
+					</div>
+				)}</Show>
+			</td>
+
+			<For each={SWILIB_PLATFORMS}>{(platform) =>
+				<SwilibCoverageValue platform={platform} value={coverage()[platform]} />
+			}</For>
+		</tr>
+	);
+};
