@@ -2,9 +2,9 @@ import { Component, createMemo, createSignal, For, Show } from "solid-js";
 import { Modal } from "solid-bootstrap";
 import { SwilibEntryBadges } from "@/components/Swilib/SwilibEntryBadges";
 import { SwilibEntryWarnings } from "@/components/Swilib/SwilibEntryWarnings";
-import { SummarySwilibAnalysisEntry, SWILIB_PLATFORMS, SwilibDevice, SummarySwilibAnalysis } from "@/api/swilib";
-import { useHLJS } from "@/hooks/useHLJS";
+import { SummarySwilibAnalysis, SummarySwilibAnalysisEntry, SWILIB_PLATFORMS, SwilibDevice } from "@/api/swilib";
 import { formatId } from "@/utils/format";
+import { HighlightCode } from "@/components/Utils/HighlightCode";
 
 interface SwilibEntryModalProps {
 	entry: SummarySwilibAnalysisEntry;
@@ -27,7 +27,6 @@ export const SwilibEntryModal: Component<SwilibEntryModalProps> = (props) => {
 	});
 	const coverageMatrixWidth = () => Math.max(...Object.values(coverageMatrix()).map((row) => row.length));
 	const [showModal, setShowModal] = createSignal(true);
-	const hljs = useHLJS();
 
 	return (
 		<Modal size="lg" centered show={showModal()} onHide={() => setShowModal(false)} onExited={props.onHide}>
@@ -39,7 +38,7 @@ export const SwilibEntryModal: Component<SwilibEntryModalProps> = (props) => {
 				</Modal.Title>
 			</Modal.Header>
 			<Modal.Body>
-				<div innerHTML={hljs.highlight(props.entry.name ?? "/* Unused */", {language: 'c'}).value}></div>
+				<HighlightCode language="c" code={props.entry.name ?? "/* Unused */"} />
 
 				<div class="my-3">
 					<SwilibEntryWarnings value={props.entry.flags}/>
