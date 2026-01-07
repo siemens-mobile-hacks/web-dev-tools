@@ -13,21 +13,19 @@ import { SwilibStatistic } from "@/pages/Swilib/SwilibStatistic";
 import { BACKEND_URL } from "@/utils/env";
 import { SwilibTable } from "@/pages/Swilib/SwilibTable";
 import { SwilibEntryModal } from "@/pages/SwilibSummary/SwilibEntryModal";
+import { useResourcesState } from "@/hooks/useResourcesState";
 
 const SwilibPage: Component = () => {
 	const [searchParams] = useSearchParams<{ model: string; target: string }>();
 	const [tableOptions, setTableOptions] = useSwilibTableOptionsStore();
 	const target = () => searchParams.target ?? searchParams.model ?? '';
-	const [response] = createResource(async () => {
-		const [analysis, devices, targetAnalysis] = await Promise.all([
-			getSummarySwilibAnalysis(),
-			getAvailableSwilibDevices(),
-			getTargetSwilibAnalysis(target()),
-		]);
-		return { analysis, devices, targetAnalysis };
-	});
+	const [devices] = createResource(getAvailableSwilibDevices);
+	const [summaryAnalysis] = createResource(getSummarySwilibAnalysis);
+	const [targetAnalysis] = createResource(target, (target) => getTargetSwilibAnalysis(target));
 
-	const groups = () => tableOptions.groupByFile ? response()?.analysis?.files : ['swilib.h'];
+	const resourcesState = useResourcesState([devices, summaryAnalysis, targetAnalysis]);
+
+	const groups = () => tableOptions.groupByFile ? summaryAnalysis()?.files : ['swilib.h'];
 	const [selectedEntry, setSelectedEntry] = createSignal<SummarySwilibAnalysisEntry>();
 
 	const handleFilterByType = (e: Event & { currentTarget: HTMLInputElement }) => {
@@ -37,7 +35,7 @@ const SwilibPage: Component = () => {
 
 	return <>
 		<div class="mb-2">
-			<SwilibTargetsTabs selected={target()} devices={response()?.devices} />
+			<SwilibTargetsTabs selected={target()} devices={devices()} />
 		</div>
 
 		<div class="d-flex justify-content-start mb-3">
@@ -132,40 +130,40 @@ const SwilibPage: Component = () => {
 				class="me-3" as={A as any} variant="outline-success" size="sm"
 				href={`${BACKEND_URL}/api/swilib/download/${target()}/swilib_${target()}.vkp`}
 			>
-				<i class="bi bi-download"></i> Normalized <b>.vkp</b>
+				<i class="bi bi-download"></i> Download <b>.vkp</b>
 			</Button>
 
 			<Button
 				class="me-3" as={A as any} variant="outline-success" size="sm"
 				href={`${BACKEND_URL}/api/swilib/download/${target()}/swilib_${target()}.blib`}
 			>
-				<i class="bi bi-download"></i> Library as <b>swi.blib</b>
+				<i class="bi bi-download"></i> Download <b>swi.blib</b>
 			</Button>
 
 			<Button
 				class="me-3" as={A as any} variant="outline-primary" size="sm" target="_blank" rel="noopener"
-				href={`https://patches.kibab.com/patches/details.php5?id=${response()?.targetAnalysis.patchId}`}
+				href={`https://patches.kibab.com/patches/details.php5?id=${targetAnalysis()?.patchId}`}
 			>
 				<i class="bi bi-browser-chrome"></i> Open on Kibab
 			</Button>
 		</div>
 
-		<Show when={response.loading}>
+		<Show when={resourcesState.isLoading}>
 			<Spinner animation="border" role="status">
 				<span class="visually-hidden">Loading...</span>
 			</Spinner>
 		</Show>
 
-		<Show when={response.error}>
+		<Show when={resourcesState.isError}>
 			<div class="alert alert-danger" role="alert">
 				Can't load data from the server. Please reload the page.
 			</div>
 		</Show>
 
-		<Show when={response()}>{(response) => <>
-			<Show when={response().targetAnalysis.statistic.bad > 0}>
+		<Show when={resourcesState.isReady}>
+			<Show when={targetAnalysis()!.statistic.bad > 0}>
 				<div class="alert alert-danger" role="alert">
-					Swilib has <b>{response().targetAnalysis.statistic.bad}</b> fatal errors!!!
+					Swilib has <b>{targetAnalysis()!.statistic.bad}</b> fatal errors!!!
 					<Button
 						variant="outline-danger ms-3"
 						size="sm"
@@ -177,13 +175,13 @@ const SwilibPage: Component = () => {
 				</div>
 			</Show>
 
-			<SwilibStatistic statistic={response().targetAnalysis.statistic} />
+			<SwilibStatistic statistic={targetAnalysis()!.statistic} />
 
 			<For each={groups()}>{(file) =>
 				<SwilibTable
 					file={file}
-					analysis={response().analysis}
-					targetAnalysis={response().targetAnalysis}
+					analysis={summaryAnalysis()!}
+					targetAnalysis={targetAnalysis()!}
 					onEntrySelect={(entry) => setSelectedEntry(entry)}
 				/>
 			}</For>
@@ -191,12 +189,12 @@ const SwilibPage: Component = () => {
 			<Show when={selectedEntry()}>{(selectedEntry) =>
 				<SwilibEntryModal
 					entry={selectedEntry()}
-					analysis={response().analysis}
-					devices={response().devices}
+					analysis={summaryAnalysis()!}
+					devices={devices()!}
 					onHide={() => setSelectedEntry(undefined)}
 				/>
 			}</Show>
-		</>}</Show>
+		</Show>
 	</>;
 };
 

@@ -1,4 +1,4 @@
-import { BACKEND_URL } from "@/utils/env";
+import { apiClient } from "@/api/client";
 
 export interface SwilibDevice {
 	target: string;
@@ -74,28 +74,29 @@ export interface CpuSymbolsFile {
 
 export const SWILIB_PLATFORMS = ['ELKA', 'NSG', 'X75', 'SG'];
 
-export async function getTargetSwilibAnalysis(target: string): Promise<TargetSwilibAnalysis> {
-	const url = `${BACKEND_URL}/api/swilib/analyze/${target}`;
-	const response = await fetch(url);
-	return response.json();
+export async function getTargetSwilibAnalysis(target: string) {
+	const response = await apiClient.get<TargetSwilibAnalysis>(`/api/swilib/analyze/${target}`);
+	return response.data;
 }
 
-export async function getSummarySwilibAnalysis(): Promise<SummarySwilibAnalysis> {
-	const url = `${BACKEND_URL}/api/swilib/analyze/all`;
-	const response = await fetch(url);
-	return response.json();
+export async function getSummarySwilibAnalysis() {
+	const response = await apiClient.get<SummarySwilibAnalysis>(`/api/swilib/analyze/all`);
+	return response.data;
 }
 
-export async function getAvailableSwilibDevices(): Promise<SwilibDevice[]> {
-	const url = `${BACKEND_URL}/api/swilib/devices`;
-	const response = await fetch(url);
-	return response.json();
+export async function getAvailableSwilibDevices() {
+	const response = await apiClient.get<SwilibDevice[]>(`/api/swilib/devices`, {
+		id: "swilib-devices",
+		cache: {
+			enabled: true
+		},
+	});
+	return response.data;
 }
 
 export async function getAvailableCpuSymbolsFiles(): Promise<CpuSymbolsFile[]> {
-	const url = `${BACKEND_URL}/api/disassembler/cpu-symbols`;
-	const response = await fetch(url);
-	return response.json();
+	const response = await apiClient.get<CpuSymbolsFile[]>(`/api/disassembler/cpu-symbols`);
+	return response.data;
 }
 
 export function getPatternsCoverage(patterns: Record<string, string>, coverage: Record<string, number>) {

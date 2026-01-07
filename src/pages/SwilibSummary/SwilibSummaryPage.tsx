@@ -6,23 +6,20 @@ import { SwilibTable } from "@/pages/SwilibSummary/SwilibTable";
 import { getAvailableSwilibDevices, getSummarySwilibAnalysis, SummarySwilibAnalysisEntry } from "@/api/swilib";
 import { formatId } from "@/utils/format";
 import { SwilibEntryModal } from "@/pages/SwilibSummary/SwilibEntryModal";
+import { useResourcesState } from "@/hooks/useResourcesState";
 
 const SwilibSummaryPage: Component = () => {
 	const [tableOptions, setTableOptions] = useSwilibTableOptionsStore();
-	const [response] = createResource(async () => {
-		const [analysis, devices] = await Promise.all([
-			getSummarySwilibAnalysis(),
-			getAvailableSwilibDevices(),
-		]);
-		return { analysis, devices };
-	});
-	const groups = () => tableOptions.groupByFile ? response()?.analysis?.files : ['swilib.h'];
+	const [devices] = createResource(getAvailableSwilibDevices);
+	const [summaryAnalysis] = createResource(getSummarySwilibAnalysis);
+	const resourcesState = useResourcesState([devices, summaryAnalysis]);
+	const groups = () => tableOptions.groupByFile ? summaryAnalysis()?.files : ['swilib.h'];
 	const [selectedEntry, setSelectedEntry] = createSignal<SummarySwilibAnalysisEntry>();
 
 	return <>
 		<div class="mb-3">
 			<div class="mb-2">
-				<SwilibTargetsTabs devices={response()?.devices} />
+				<SwilibTargetsTabs devices={devices()} />
 			</div>
 
 			<div class="d-flex justify-content-start">
@@ -81,27 +78,27 @@ const SwilibSummaryPage: Component = () => {
 			/>
 		</div>
 
-		<Show when={response.loading}>
+		<Show when={resourcesState.isLoading}>
 			<Spinner animation="border" role="status">
 				<span class="visually-hidden">Loading...</span>
 			</Spinner>
 		</Show>
 
-		<Show when={response.error}>
+		<Show when={resourcesState.isError}>
 			<div class="alert alert-danger" role="alert">
 				Can't load data from the server. Please reload the page.
 			</div>
 		</Show>
 
-		<Show when={response()}>{(response) => <>
+		<Show when={resourcesState.isReady}>
 			<div class="alert alert-info" role="alert">
-				Next free ID: <b>{formatId(response().analysis.nextId)}</b>
+				Next free ID: <b>{formatId(summaryAnalysis()!.nextId)}</b>
 			</div>
 
 			<For each={groups()}>{(file) =>
 				<SwilibTable
 					file={file}
-					analysis={response().analysis}
+					analysis={summaryAnalysis()!}
 					onEntrySelect={(entry) => setSelectedEntry(entry)}
 				/>
 			}</For>
@@ -109,12 +106,12 @@ const SwilibSummaryPage: Component = () => {
 			<Show when={selectedEntry()}>{(selectedEntry) =>
 				<SwilibEntryModal
 					entry={selectedEntry()}
-					analysis={response().analysis}
-					devices={response().devices}
+					analysis={summaryAnalysis()!}
+					devices={devices()!}
 					onHide={() => setSelectedEntry(undefined)}
 				/>
 			}</Show>
-		</>}</Show>
+		</Show>
 	</>;
 };
 

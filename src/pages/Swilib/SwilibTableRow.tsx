@@ -17,11 +17,7 @@ interface SwilibTableRowProps {
 
 export const SwilibTableRow: Component<SwilibTableRowProps> = (props) => {
 	const [tableOptions] = useSwilibTableOptionsStore();
-	const coverage = createMemo(() => {
-		if (tableOptions.coverageType == 'PTR')
-			return getPatternsCoverage(props.entry.patterns, props.entry.coverage);
-		return props.entry.coverage;
-	});
+	const coverage = createMemo(() => getPatternsCoverage(props.entry.patterns, props.entry.coverage));
 	const rowColor = createMemo(() => {
 		// Has error
 		if (props.targetEntry.error)
