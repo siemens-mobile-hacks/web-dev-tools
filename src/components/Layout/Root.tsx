@@ -22,6 +22,7 @@ export const Root: Component = () => {
 
 				{/* Legacy routes */}
 				<Route path="/swilib" component={() => <Navigate href={() => "/swilib/analysis/summary"} />} />
+				<Route path="/swilib/analysis" component={() => <Navigate href={() => "/swilib/analysis/summary"} />} />
 				<Route path="/swilib/phone" component={() => <Navigate href={() => "/swilib/analysis/target"} />} />
 				<Route path="/re" component={() => <Navigate href={() => "/re/symbols"} />} />
 			</Router>
