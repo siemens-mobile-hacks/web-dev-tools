@@ -1,7 +1,7 @@
 /* @refresh reload */
-import { createSignal, onCleanup, onMount, ParentComponent, Show } from "solid-js";
+import { createSignal, ErrorBoundary, onCleanup, onMount, ParentComponent, Show } from "solid-js";
 import { Header } from "@/components/Layout/Header";
-import { Container, Offcanvas } from "solid-bootstrap";
+import { Alert, Button, Container, Offcanvas } from "solid-bootstrap";
 import { Sidebar } from "@/components/Layout/Sidebar/Sidebar";
 import { ThemeProvider } from "@/context/ThemeProvider";
 
@@ -48,11 +48,25 @@ export const App: ParentComponent = (props) => {
 					</Show>
 
 					<main class="flex-fill p-3 pt-3">
-						{props.children}
+						<ErrorBoundary fallback={(error, reset) => {
+							console.error(error);
+							return (
+								<Alert variant="danger">
+									<Alert.Heading>Page loading error</Alert.Heading>
+									<p>
+										{error.message} ({error.name})
+									</p>
+									<Button onClick={() => reset()} variant="outline-danger">
+										Try again
+									</Button>
+								</Alert>
+							);
+						}}>
+							{props.children}
+						</ErrorBoundary>
 					</main>
 				</div>
 			</Container>
 		</ThemeProvider>
 	);
-
 };

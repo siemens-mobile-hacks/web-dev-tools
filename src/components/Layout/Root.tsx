@@ -19,6 +19,11 @@ export const Root: Component = () => {
 				<Route path="/swilib/analysis/summary" component={SwilibSummaryPage} />
 				<Route path="/swilib/analysis/target" component={SwilibPage} />
 				<Route path="/re/symbols" component={ReFilesPage} />
+
+				{/* Legacy routes */}
+				<Route path="/swilib" component={() => <Navigate href={() => "/swilib/analysis"} />} />
+				<Route path="/swilib/phone" component={() => <Navigate href={() => "/swilib/analysis/target"} />} />
+				<Route path="/re" component={() => <Navigate href={() => "/re/symbols"} />} />
 			</Router>
 		</ErrorBoundary>
 	);

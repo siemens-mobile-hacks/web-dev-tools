@@ -6,9 +6,19 @@ import path from 'node:path';
 import fs from 'node:fs';
 
 const ROUTES = [
-	`/re`,
 	`/swilib`,
 	`/swilib/phone`,
+	`/swilib/analysis/target`,
+	`/swilib/check`,
+	`/swilib/merge`,
+
+	`/re`,
+	`/re/symbols`,
+	`/re/ptr89`,
+
+	`/db`,
+	`/db/patches-map`,
+	`/db/memory-map`,
 ];
 
 function postBuildPlugin(): Plugin {
