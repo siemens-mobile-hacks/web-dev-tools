@@ -52,6 +52,11 @@
 			color: var(--sidebar-link-active-color);
 			font-weight: 400;
 		}
+
+		&--disabled {
+			color: var(--bs-gray-500);
+			pointer-events: none;
+		}
 	}
 
 	&__label {

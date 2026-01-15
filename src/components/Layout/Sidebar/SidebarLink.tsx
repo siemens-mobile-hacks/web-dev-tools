@@ -7,13 +7,18 @@ export interface SidebarLinkProps {
 	label: string;
 	href: string;
 	icon: string;
+	disabled?: boolean;
 }
 
 export const SidebarLink: Component<SidebarLinkProps> = (props) => {
 	const match = useMatch(() => resolveURL(props.href));
 	return (
 		<A
-			class={clsx("sidebar__link", match() && "sidebar__link--active")}
+			class={clsx(
+				"sidebar__link",
+				match() && "sidebar__link--active",
+				props.disabled && "sidebar__link--disabled"
+			)}
 			href={props.href}
 		>
 			<i class={`bi ${props.icon} sidebar__icon`}/>

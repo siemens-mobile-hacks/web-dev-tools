@@ -8,8 +8,9 @@ import {
 	ParentComponent,
 	useContext
 } from "solid-js";
-import { ThemeType } from "@/store/globalSettingsStore";
 import { makePersistedSignal } from "@/utils/makePersistedSignal";
+
+type ThemeType = "light" | "dark" | "system";
 
 interface ThemeContext {
 	theme: Accessor<ThemeType>;

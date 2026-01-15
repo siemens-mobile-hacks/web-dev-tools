@@ -18,15 +18,15 @@ export const Sidebar: Component<SidebarProps> = (props) => {
 			title: "Functions library",
 			links: [
 				{ label: "Swilib analysis", href: "/swilib/analysis/summary", icon: "bi bi-activity" },
-				{ label: "Check swilib.vkp", href: "/swilib/check", icon: "bi bi-file-earmark-check" },
-				{ label: "Merge swilib.vkp", href: "/swilib/merge", icon: "bi bi-arrow-left-right" }
+				{ label: "Check swilib.vkp", href: "/swilib/check", icon: "bi bi-file-earmark-check", disabled: true },
+				{ label: "Merge swilib.vkp", href: "/swilib/merge", icon: "bi bi-arrow-left-right", disabled: true }
 			]
 		},
 
 		{
 			title: "Reverse engineering",
 			links: [
-				{ label: "Patterns finder", href: "/re/ptr89", icon: "bi bi-search" },
+				{ label: "Patterns finder", href: "/re/ptr89", icon: "bi bi-search", disabled: true },
 				{ label: "Download symbols", href: "/re/symbols", icon: "bi bi-download" }
 			]
 		},
@@ -34,8 +34,8 @@ export const Sidebar: Component<SidebarProps> = (props) => {
 		{
 			title: "Database",
 			links: [
-				{ label: "Patches map", href: "/db/patches-map", icon: "bi bi-diagram-3" },
-				{ label: "Memory map", href: "/db/memory-map", icon: "bi bi-grid-3x3-gap" }
+				{ label: "Patches map", href: "/db/patches-map", icon: "bi bi-diagram-3", disabled: true },
+				{ label: "Memory map", href: "/db/memory-map", icon: "bi bi-grid-3x3-gap", disabled: true }
 			]
 		}
 	];
