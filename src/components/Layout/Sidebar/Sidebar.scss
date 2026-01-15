@@ -54,7 +54,7 @@
 		}
 
 		&--disabled {
-			color: var(--bs-gray-500);
+			opacity: 0.3;
 			pointer-events: none;
 		}
 	}
