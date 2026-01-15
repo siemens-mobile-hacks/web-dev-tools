@@ -2,13 +2,13 @@ import { Component, createResource, createSignal, For, Show } from "solid-js";
 import { useSwilibTableOptionsStore } from "@/store/swilibTableOptionsStore";
 import { SwilibTargetsTabs } from "@/components/Swilib/SwilibTargetsTabs";
 import { Button, Form, Spinner } from "solid-bootstrap";
-import { SwilibTable } from "@/pages/SwilibSummary/SwilibTable";
+import { SwilibTable } from "@/pages/SwilibSummaryAnalysis/SwilibTable";
 import { getAvailableSwilibDevices, getSummarySwilibAnalysis, SummarySwilibAnalysisEntry } from "@/api/swilib";
 import { formatId } from "@/utils/format";
-import { SwilibEntryModal } from "@/pages/SwilibSummary/SwilibEntryModal";
+import { SwilibEntryModal } from "@/pages/SwilibSummaryAnalysis/SwilibEntryModal";
 import { useResourcesState } from "@/hooks/useResourcesState";
 
-const SwilibSummaryPage: Component = () => {
+const SwilibSummaryAnalysisPage: Component = () => {
 	const [tableOptions, setTableOptions] = useSwilibTableOptionsStore();
 	const [devices] = createResource(getAvailableSwilibDevices);
 	const [summaryAnalysis] = createResource(getSummarySwilibAnalysis);
@@ -120,4 +120,4 @@ const SwilibSummaryPage: Component = () => {
 	</>;
 };
 
-export default SwilibSummaryPage;
+export default SwilibSummaryAnalysisPage;

@@ -2,8 +2,8 @@ import { type Component, ErrorBoundary, lazy } from "solid-js";
 import { App } from "@/components/Layout/App";
 import { Navigate, Route, Router } from "@solidjs/router";
 
-const SwilibSummaryPage = lazy(() => import("@/pages/SwilibSummary/SwilibSummaryPage"));
-const SwilibPage = lazy(() => import("@/pages/Swilib/SwilibPage"));
+const SwilibSummaryAnalysisPage = lazy(() => import("@/pages/SwilibSummaryAnalysis/SwilibSummaryAnalysisPage"));
+const SwilibTargetAnalysisPage = lazy(() => import("@/pages/SwilibTargetAnalysis/SwilibTargetAnalysisPage"));
 const ReFilesPage = lazy(() => import("@/pages/ReFiles/ReFilesPage"));
 
 export const Root: Component = () => {
@@ -16,8 +16,8 @@ export const Root: Component = () => {
 		<ErrorBoundary fallback={showAppError}>
 			<Router root={App} base={import.meta.env.BASE_URL}>
 				<Route path="/" component={() => <Navigate href={() => "/swilib/analysis/summary"} />} />
-				<Route path="/swilib/analysis/summary" component={SwilibSummaryPage} />
-				<Route path="/swilib/analysis/target" component={SwilibPage} />
+				<Route path="/swilib/analysis/summary" component={SwilibSummaryAnalysisPage} />
+				<Route path="/swilib/analysis/target" component={SwilibTargetAnalysisPage} />
 				<Route path="/re/symbols" component={ReFilesPage} />
 
 				{/* Legacy routes */}

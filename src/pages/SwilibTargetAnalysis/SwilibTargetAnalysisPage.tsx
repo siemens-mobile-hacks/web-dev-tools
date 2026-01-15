@@ -9,13 +9,13 @@ import {
 	getTargetSwilibAnalysis,
 	SummarySwilibAnalysisEntry,
 } from "@/api/swilib";
-import { SwilibStatistic } from "@/pages/Swilib/SwilibStatistic";
+import { SwilibStatistic } from "@/pages/SwilibTargetAnalysis/SwilibStatistic";
 import { BACKEND_URL } from "@/utils/env";
-import { SwilibTable } from "@/pages/Swilib/SwilibTable";
-import { SwilibEntryModal } from "@/pages/SwilibSummary/SwilibEntryModal";
+import { SwilibTable } from "@/pages/SwilibTargetAnalysis/SwilibTable";
+import { SwilibEntryModal } from "@/pages/SwilibSummaryAnalysis/SwilibEntryModal";
 import { useResourcesState } from "@/hooks/useResourcesState";
 
-const SwilibPage: Component = () => {
+const SwilibTargetAnalysisPage: Component = () => {
 	const [searchParams] = useSearchParams<{ model: string; target: string }>();
 	const [tableOptions, setTableOptions] = useSwilibTableOptionsStore();
 	const target = () => searchParams.target ?? searchParams.model ?? '';
@@ -206,4 +206,4 @@ const SwilibPage: Component = () => {
 	</>;
 };
 
-export default SwilibPage;
+export default SwilibTargetAnalysisPage;

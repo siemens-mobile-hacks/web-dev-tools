@@ -7,7 +7,7 @@ import {
 	TargetSwilibAnalysisEntry
 } from "@/api/swilib";
 import { useSwilibTableOptionsStore } from "@/store/swilibTableOptionsStore";
-import { SwilibTableRow } from "@/pages/Swilib/SwilibTableRow";
+import { SwilibTableRow } from "@/pages/SwilibTargetAnalysis/SwilibTableRow";
 
 interface SwilibTableProps {
 	file: string;

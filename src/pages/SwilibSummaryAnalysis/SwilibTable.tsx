@@ -2,7 +2,7 @@ import { Component, createEffect, createMemo, For, on } from "solid-js";
 import { TableSortButton } from "@/components/TableSortButton";
 import { SummarySwilibAnalysis, SummarySwilibAnalysisEntry, SWILIB_PLATFORMS } from "@/api/swilib";
 import { useSwilibTableOptionsStore } from "@/store/swilibTableOptionsStore";
-import { SwilibTableRow } from "@/pages/SwilibSummary/SwilibTableRow";
+import { SwilibTableRow } from "@/pages/SwilibSummaryAnalysis/SwilibTableRow";
 
 interface SwilibTableProps {
 	file: string;
