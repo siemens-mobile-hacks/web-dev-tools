@@ -53,6 +53,7 @@ $info:      #0aa7c7;
 @import "bootstrap/scss/utilities/api";
 
 // 8. Add additional custom code here
+
 body {
 	overflow-y: scroll;
 }
@@ -62,16 +63,14 @@ body {
 }
 
 .table-sticky-header {
-	thead {
+	thead tr {
 		position: sticky;
-		top: -1px;
-	}
-
-	thead {
+		top: calc(var(--bs-header-height) - 1px);
+		background-color: var(--bs-tertiary-bg);
+		z-index: 3;
 		box-shadow: 0 1px 0 var(--bs-table-border-color);
 	}
-
-	th {
+	thead th {
 		background-color: var(--bs-tertiary-bg);
 	}
 }
@@ -85,13 +84,46 @@ body {
 	cursor: pointer;
 }
 
+:root {
+	--bs-header-height: 47px;
+}
+
+/* Light theme fixes */
+@include color-mode(light) {
+	--bs-content-separator: #dfe0df;
+
+	--sidebar-link-active-bg: #e9f2fe;
+	--sidebar-link-active-color: #1868db;
+
+	--sidebar-link-hover-bg: #f0f1f2;
+
+	.dropdown-menu {
+		--bs-dropdown-link-hover-bg: #e9ecef;
+	}
+}
+
 /* Dark theme fixes */
 @include color-mode(dark) {
+	--bs-body-bg: #1f1f21;
+	--bs-tertiary-bg: #303134;
+	--bs-content-separator: #38393c;
+
+	--sidebar-link-active-bg: #1c2b42;
+	--sidebar-link-active-color: #669df1;
+
+	--sidebar-link-hover-bg: #242528;
+
+	table {
+		--bs-table-border-color: #4b4d51;
+	}
+
 	/* Fix text colors */
+	--bs-primary: #6da7fe;
 	--bs-danger-rgb: 224, 82, 96;
 	--bs-primary-rgb: 109, 167, 254;
 	--bs-info-rgb: 11, 171, 203;
 	--bs-success-rgb: 32, 172, 107;
+	--bs-secondary-rgb: 140, 148, 155;
 
 	/* Fix table rows */
 	.table-danger {
@@ -193,6 +225,12 @@ body {
 	.bg-danger {
 		--bs-danger-rgb: 157, 67, 76;
 	}
+}
+
+svg {
+	width: 1em;
+	height: 1em;
+	fill: currentColor;
 }
 
 @import "bootstrap-icons/font/bootstrap-icons.css";

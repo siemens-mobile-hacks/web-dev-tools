@@ -19,6 +19,7 @@
 		"vite-plugin-solid-svg": "^0.8.1"
 	},
 	"dependencies": {
+		"@material-design-icons/svg": "^0.14.15",
 		"@solid-primitives/context": "^0.3.2",
 		"@solidjs/router": "^0.15.4",
 		"@suid/types": "^0.8.0",
@@ -30,6 +31,7 @@
 		"bootstrap-icons": "^1.13.1",
 		"clsx": "^2.1.1",
 		"date-fns": "^3.6.0",
+		"es-toolkit": "^1.43.0",
 		"highlight.js": "^11.11.1",
 		"sass": "^1.97.2",
 		"solid-bootstrap": "^1.0.21",

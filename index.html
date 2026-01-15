@@ -1,23 +1,30 @@
 <!DOCTYPE html>
-<html lang="en" data-bs-theme="light">
+<html lang="en">
 	<head>
 		<meta charset="utf-8" />
 		<meta name="viewport" content="initial-scale=1.0, minimum-scale=1.0, maximum-scale=2.0, user-scalable=yes" />
 		<meta name="theme-color" content="#000000" />
 		<link rel="shortcut icon" type="image/ico" href="/src/assets/favicon.ico" />
 		<title>Siemens Dev Tools</title>
-
-		<script>
-		(function () {
-			const media = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)');
-			const themeChange = () => {
-				document.documentElement.setAttribute('data-bs-theme', media.matches ? 'dark' : 'light');
-			};
-			if (media) {
-				media.addEventListener('change', themeChange, false);
-				themeChange();
+		<style>
+			html[data-bs-theme="dark"] {
+				color-scheme: dark;
 			}
-		})();
+			html[data-bs-theme="light"] {
+				color-scheme: light;
+			}
+		</style>
+		<script>
+			try {
+				let theme = JSON.parse(localStorage.getItem('bootstrapTheme') ?? '"system"');
+				if (theme === "system") {
+					const media = window.matchMedia('(prefers-color-scheme: dark)');
+					theme = media.matches ? 'dark' : 'light';
+				}
+				document.documentElement.dataset.bsTheme = theme;
+			} catch (e) {
+				console.error(e);
+			}
 		</script>
 	</head>
 	<body>

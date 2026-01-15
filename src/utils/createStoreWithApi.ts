@@ -1,9 +1,9 @@
-import { PersistentOptions, makePersisted } from '@/utils/makePersisted';
+import { PersistentStoreOptions, makePersistedStore } from '@/utils/makePersistedStore';
 import { createRoot } from 'solid-js';
 import { SetStoreFunction, createStore } from 'solid-js/store';
 
 export interface CreateStoreWithApiOptions<S> {
-	persist?: PersistentOptions<S>;
+	persist?: PersistentStoreOptions<S>;
 }
 
 export function createStoreWithApi<S extends object, A>(
@@ -13,7 +13,7 @@ export function createStoreWithApi<S extends object, A>(
 ): () => [store: S, api: A] {
 	const [store, setStore] = createRoot(() => {
 		return options?.persist
-			? makePersisted(createStore<S>(initialData()), options.persist)
+			? makePersistedStore(createStore<S>(initialData()), options.persist)
 			: createStore<S>(initialData());
 	});
 	const api = createApi(store, setStore);

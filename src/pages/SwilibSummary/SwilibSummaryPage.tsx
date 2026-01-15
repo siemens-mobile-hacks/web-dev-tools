@@ -17,7 +17,7 @@ const SwilibSummaryPage: Component = () => {
 	const [selectedEntry, setSelectedEntry] = createSignal<SummarySwilibAnalysisEntry>();
 
 	return <>
-		<div class="mb-3">
+		<div class="mb-2">
 			<div class="mb-2">
 				<SwilibTargetsTabs devices={devices()} />
 			</div>
@@ -43,7 +43,11 @@ const SwilibSummaryPage: Component = () => {
 					/>
 				</div>
 
-				<Button variant="outline-primary" onClick={() => setTableOptions("globalCollapsed", (prev) => !prev)}>
+				<Button
+					variant="outline-primary"
+					size="sm"
+					onClick={() => setTableOptions("globalCollapsed", (prev) => !prev)}
+				>
 					<Show when={!tableOptions.globalCollapsed}>
 						<i class="bi bi-eye-slash"></i> Collapse all
 					</Show>
@@ -54,7 +58,7 @@ const SwilibSummaryPage: Component = () => {
 			</div>
 		</div>
 
-		<div class="d-flex flex-row mb-3">
+		<div class="d-flex flex-row mb-2">
 			<span class="me-3"><i class="bi bi-globe"></i> Show coverage:</span>
 			<Form.Check
 				inline
@@ -91,7 +95,8 @@ const SwilibSummaryPage: Component = () => {
 		</Show>
 
 		<Show when={resourcesState.isReady}>
-			<div class="alert alert-info" role="alert">
+			<div class="text-secondary mb-2">
+				<span class="bi bi-info-circle"></span> {' '}
 				Next free ID: <b>{formatId(summaryAnalysis()!.nextId)}</b>
 			</div>
 

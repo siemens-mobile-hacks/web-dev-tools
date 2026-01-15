@@ -1,6 +1,6 @@
-import { Component, createResource, createSignal, For, Show } from 'solid-js';
-import { A, useSearchParams } from '@solidjs/router';
-import { Button, Form, Spinner } from 'solid-bootstrap';
+import { Component, createMemo, createResource, createSignal, For, Show } from 'solid-js';
+import { useSearchParams } from '@solidjs/router';
+import { Button, Dropdown, Form, Spinner } from 'solid-bootstrap';
 import { SwilibTargetsTabs } from '@/components/Swilib/SwilibTargetsTabs';
 import { useSwilibTableOptionsStore } from "@/store/swilibTableOptionsStore";
 import {
@@ -32,6 +32,25 @@ const SwilibPage: Component = () => {
 		if (e.currentTarget.checked)
 			setTableOptions("filterByType", e.currentTarget.value);
 	};
+
+	const downloadLinks = createMemo(() => ([
+		{
+			label: <>V-Klay patch <b>.vkp</b></>,
+			href: `${BACKEND_URL}/api/swilib/download/${target()}/swilib_${target()}.vkp`
+		},
+		{
+			label: <>Binary library <b>.blib</b></>,
+			href: `${BACKEND_URL}/api/swilib/download/${target()}/swilib_${target()}.blib`
+		},
+		{
+			label: <>Ghidra symbols <b>.txt</b></>,
+			href: `${BACKEND_URL}/api/swilib/download/${target()}/symbols-${target()}.txt`
+		},
+		{
+			label: <>IDA Pro symbols <b>.idc</b></>,
+			href: `${BACKEND_URL}/api/swilib/download/${target()}/symbols-${target()}.idc`
+		},
+	]));
 
 	return <>
 		<div class="mb-2">
@@ -79,7 +98,11 @@ const SwilibPage: Component = () => {
 				/>
 			</div>
 
-			<Button variant="outline-primary" onClick={() => setTableOptions("globalCollapsed", (prev) => !prev)}>
+			<Button
+				size="sm"
+				variant="outline-primary"
+				onClick={() => setTableOptions("globalCollapsed", (prev) => !prev)}
+			>
 				<Show when={!tableOptions.globalCollapsed}>
 					<i class="bi bi-eye-slash"></i> Collapse all
 				</Show>
@@ -125,23 +148,22 @@ const SwilibPage: Component = () => {
 			/>
 		</div>
 
-		<div class="d-flex flex-row mb-3">
-			<Button
-				class="me-3" as={A as any} variant="outline-success" size="sm"
-				href={`${BACKEND_URL}/api/swilib/download/${target()}/swilib_${target()}.vkp`}
-			>
-				<i class="bi bi-download"></i> Download <b>.vkp</b>
-			</Button>
+		<div class="d-flex flex-row mb-3 gap-2">
+			<Dropdown>
+				<Dropdown.Toggle variant="outline-success" size="sm">
+					<i class="bi bi-download"></i> Download as …
+				</Dropdown.Toggle>
+				<Dropdown.Menu>
+					<For each={downloadLinks()}>{(link) => <>
+						<Dropdown.Item href={link.href}>
+							<i class="bi bi-download"></i> {link.label}
+						</Dropdown.Item>
+					</>}</For>
+				</Dropdown.Menu>
+			</Dropdown>
 
 			<Button
-				class="me-3" as={A as any} variant="outline-success" size="sm"
-				href={`${BACKEND_URL}/api/swilib/download/${target()}/swilib_${target()}.blib`}
-			>
-				<i class="bi bi-download"></i> Download <b>swi.blib</b>
-			</Button>
-
-			<Button
-				class="me-3" as={A as any} variant="outline-primary" size="sm" target="_blank" rel="noopener"
+				as={"a"} variant="outline-primary" size="sm" target="_blank" rel="noopener"
 				href={`https://patches.kibab.com/patches/details.php5?id=${targetAnalysis()?.patchId}`}
 			>
 				<i class="bi bi-browser-chrome"></i> Open on Kibab
@@ -161,20 +183,6 @@ const SwilibPage: Component = () => {
 		</Show>
 
 		<Show when={resourcesState.isReady}>
-			<Show when={targetAnalysis()!.statistic.bad > 0}>
-				<div class="alert alert-danger" role="alert">
-					Swilib has <b>{targetAnalysis()!.statistic.bad}</b> fatal errors!!!
-					<Button
-						variant="outline-danger ms-3"
-						size="sm"
-						onClick={() => setTableOptions("filterByType", "errors")}
-						hidden={tableOptions.filterByType == 'errors'}
-					>
-						Show bad functions
-					</Button>
-				</div>
-			</Show>
-
 			<SwilibStatistic statistic={targetAnalysis()!.statistic} />
 
 			<For each={groups()}>{(file) =>

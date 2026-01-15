@@ -15,10 +15,10 @@ export const Root: Component = () => {
 	return (
 		<ErrorBoundary fallback={showAppError}>
 			<Router root={App} base={import.meta.env.BASE_URL}>
-				<Route path="/" component={() => <Navigate href={() => "/swilib"} />} />
-				<Route path="/swilib" component={SwilibSummaryPage} />
-				<Route path="/swilib/phone" component={SwilibPage} />
-				<Route path="/re" component={ReFilesPage} />
+				<Route path="/" component={() => <Navigate href={() => "/swilib/analysis/summary"} />} />
+				<Route path="/swilib/analysis/summary" component={SwilibSummaryPage} />
+				<Route path="/swilib/analysis/target" component={SwilibPage} />
+				<Route path="/re/symbols" component={ReFilesPage} />
 			</Router>
 		</ErrorBoundary>
 	);

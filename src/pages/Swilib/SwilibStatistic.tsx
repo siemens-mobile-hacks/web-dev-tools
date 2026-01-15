@@ -9,24 +9,27 @@ interface SwilibStatisticProps {
 export const SwilibStatistic: Component<SwilibStatisticProps> = (props) => {
 	const getPercent = (v: number) => (v / props.statistic.total * 100).toFixed(0);
 	return (
-		<div class="mb-3">
+		<div class="d-flex mb-3 gap-2">
 			<Badge
-				title="Good functions."
-				bg="success fs-6"
+				title="Good functions"
+				bg="success"
+				class="fs-6"
 			>
 				OK: {props.statistic.good} | {getPercent(props.statistic.good)}%
 			</Badge>
-			{' '}
 			<Badge
-				title="Bad functions."
-				bg="danger fs-6"
+				title="Bad functions"
+				bg="danger"
+				class="fs-6"
+				hidden={props.statistic.bad == 0}
 			>
 				BAD: {props.statistic.bad} | {getPercent(props.statistic.bad)}%
 			</Badge>
-			{' '}
 			<Badge
-				title="Missing functions."
-				bg="warning text-dark fs-6"
+				title="Missing functions"
+				bg="warning"
+				class="fs-6 text-dark"
+				hidden={props.statistic.missing == 0}
 			>
 				MISS: {props.statistic.missing}| {getPercent(props.statistic.missing)}%
 			</Badge>

@@ -60,7 +60,7 @@ export const SwilibTable: Component<SwilibTableProps> = (props) => {
 			</h4>
 			<table
 				class="table table-bordered table-hover table-sticky-header"
-				style={{width: "100%", "max-width": "900px"}}
+				style={{"width": "100%", "max-width": "900px"}}
 				hidden={isCollapsed()}
 			>
 				<thead class="thead-dark">

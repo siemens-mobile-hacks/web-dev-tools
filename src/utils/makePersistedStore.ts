@@ -1,24 +1,25 @@
 import { SetStoreFunction, Store, reconcile, unwrap } from 'solid-js/store';
+import { debounce } from "es-toolkit";
 
-export interface PersistentOptions<T> {
+export type PersistentStore<T> = [get: Store<T>, set: SetStoreFunction<T>];
+
+interface PersistentStoreInternal {
+	version: number;
+	state: unknown;
+}
+
+export interface PersistentStoreOptions<T> {
 	name: string;
 	storage?: Storage;
 	version?: number;
-	serialize?: (data: unknown) => string | undefined | null;
-	deserialize?: (data: unknown) => string | undefined | null;
+	serialize?: (data: any) => string;
+	deserialize?: (data: string) => any;
 	migrate?: (persistedState: T, version: number) => T;
 	merge?: (persistedState: T, currentState: T) => T;
 	skipLoad?: boolean;
 }
 
-interface PersistentInternal {
-	version: number;
-	state: unknown;
-}
-
-export type PersistentStore<T> = [get: Store<T>, set: SetStoreFunction<T>];
-
-export function makePersisted<T>(store: [Store<T>, SetStoreFunction<T>], options: PersistentOptions<T>): PersistentStore<T> {
+export function makePersistedStore<T>(store: [Store<T>, SetStoreFunction<T>], options: PersistentStoreOptions<T>): PersistentStore<T> {
 	const {
 		name,
 		storage = localStorage,
@@ -32,7 +33,7 @@ export function makePersisted<T>(store: [Store<T>, SetStoreFunction<T>], options
 
 	const storedValue = skipLoad ? null : storage.getItem(name);
 	if (storedValue !== null) {
-		const parsed = deserialize(storedValue) as PersistentInternal;
+		const parsed = deserialize(storedValue) as PersistentStoreInternal;
 		if (parsed != null && parsed.version !== null) {
 			const typedState = parsed.state as T;
 			if (parsed.version !== version) {
@@ -44,17 +45,13 @@ export function makePersisted<T>(store: [Store<T>, SetStoreFunction<T>], options
 		}
 	}
 
-	const updateStorage = () => {
+	const updateStorage = debounce(() => {
 		const serialized = serialize({
 			version,
 			state: unwrap(store[0]) as unknown,
-		} as PersistentInternal);
-		if (serialized != null) {
-			storage.setItem(name, serialized);
-		} else {
-			storage.removeItem(name);
-		}
-	};
+		} as PersistentStoreInternal);
+		storage.setItem(name, serialized);
+	}, 0);
 
 	const setWithPersistence: SetStoreFunction<T> = (...args: any) => {
 		(store[1] as any)(...args);

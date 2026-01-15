@@ -1,0 +1,35 @@
+.header {
+	--bs-navbar-padding-y: 0.2rem;
+
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	height: var(--bs-header-height);
+	padding: 0 0.5rem;
+
+	position: sticky;
+	top: 0;
+	z-index: 1020;
+
+	background: var(--bs-body-bg);
+	border-bottom: 1px solid var(--bs-content-separator);
+
+	&__title {
+		font-size: 1.25rem;
+		font-weight: 500;
+		color: var(--bs-primary-color);
+		text-decoration: none;
+		padding: 0 0.5rem;
+	}
+
+	&__button {
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		background: transparent;
+		border: none;
+		padding: 0.5rem;
+		cursor: pointer;
+		font-size: 2rem;
+	}
+}

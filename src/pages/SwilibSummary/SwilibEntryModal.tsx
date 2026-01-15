@@ -31,9 +31,10 @@ export const SwilibEntryModal: Component<SwilibEntryModalProps> = (props) => {
 	return (
 		<Modal size="lg" centered show={showModal()} onHide={() => setShowModal(false)} onExited={props.onHide}>
 			<Modal.Header closeButton>
-				<Modal.Title>
-					<b>ID:</b> {formatId(props.entry.id)}, <b>offset:</b> {formatId(props.entry.id * 4)}
-					&nbsp;&nbsp;
+				<Modal.Title class="d-flex align-items-center">
+					<span class="me-3">
+						<b>ID:</b> {formatId(props.entry.id)}, <b>offset:</b> {formatId(props.entry.id * 4)}
+					</span>
 					<SwilibEntryBadges value={props.entry.flags}/>
 				</Modal.Title>
 			</Modal.Header>

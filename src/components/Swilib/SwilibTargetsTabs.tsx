@@ -10,14 +10,14 @@ interface SwilibTargetsTabsProps {
 export const SwilibTargetsTabs: Component<SwilibTargetsTabsProps> = (props) => {
 	return (
 		<Show when={props.devices} fallback={<div style="min-height: 48px"></div>}>
-			<div class="d-flex justify-content-between">
+			<div class="d-flex column-gap-3 flex-wrap">
 				<For each={props.devices}>{(device) =>
 					<A
 						class="text-center text-decoration-none"
 						classList={{
 							'fw-bold': props.selected === device.target
 						}}
-						href={`/swilib/phone/?target=${device.target}`}
+						href={`/swilib/analysis/target/?target=${device.target}`}
 						title={`Swilib info for ${device.model}`}
 					>
 						<small>{device.model}</small><br />

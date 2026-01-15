@@ -1,9 +1,9 @@
-import { makePersisted } from "@/utils/makePersisted";
+import { makePersistedStore } from "@/utils/makePersistedStore";
 import { createStore } from "solid-js/store";
 import { createRoot } from "solid-js";
 
 const tableOptionsStore = createRoot(() =>
-	makePersisted(createStore({
+	makePersistedStore(createStore({
 		showOldNames: true,
 		showEntryOffset: false,
 		showOriginalSymbol: false,

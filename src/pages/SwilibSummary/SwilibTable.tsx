@@ -1,6 +1,6 @@
 import { Component, createEffect, createMemo, For, on } from "solid-js";
 import { TableSortButton } from "@/components/TableSortButton";
-import { SummarySwilibAnalysisEntry, SWILIB_PLATFORMS, SummarySwilibAnalysis } from "@/api/swilib";
+import { SummarySwilibAnalysis, SummarySwilibAnalysisEntry, SWILIB_PLATFORMS } from "@/api/swilib";
 import { useSwilibTableOptionsStore } from "@/store/swilibTableOptionsStore";
 import { SwilibTableRow } from "@/pages/SwilibSummary/SwilibTableRow";
 
@@ -40,7 +40,7 @@ export const SwilibTable: Component<SwilibTableProps> = (props) => {
 			</h4>
 			<table
 				class="table table-bordered table-hover table-sticky-header"
-				style={{width: "100%", "max-width": "900px"}}
+				style={{"width": "100%", "max-width": "900px"}}
 				hidden={isCollapsed()}
 			>
 				<thead class="thead-dark">
