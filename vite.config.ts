@@ -8,6 +8,8 @@ import fs from 'node:fs';
 const ROUTES = [
 	`/swilib`,
 	`/swilib/phone`,
+	`/swilib/analysis`,
+	`/swilib/analysis/summary`,
 	`/swilib/analysis/target`,
 	`/swilib/check`,
 	`/swilib/merge`,
