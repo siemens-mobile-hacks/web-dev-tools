@@ -28,9 +28,9 @@ const SwilibTargetAnalysisPage: Component = () => {
 	const groups = () => tableOptions.groupByFile ? summaryAnalysis()?.files : ['swilib.h'];
 	const [selectedEntry, setSelectedEntry] = createSignal<SummarySwilibAnalysisEntry>();
 
-	const handleFilterByType = (e: Event & { currentTarget: HTMLInputElement }) => {
+	const handleFilterByErrors = (e: Event & { currentTarget: HTMLInputElement }) => {
 		if (e.currentTarget.checked)
-			setTableOptions("filterByType", e.currentTarget.value);
+			setTableOptions("filterByErrors", e.currentTarget.value);
 	};
 
 	const downloadLinks = createMemo(() => ([
@@ -113,38 +113,38 @@ const SwilibTargetAnalysisPage: Component = () => {
 		</div>
 
 		<div class="d-flex flex-row mb-3">
-			<span class="me-3"><i class="bi bi-funnel"></i> Show functions:</span>
+			<span class="me-3"><i class="bi bi-funnel"></i> Filter functions:</span>
 			<Form.Check
 				inline
 				type="radio"
-				id="filter-type-all"
-				name="filter-type"
+				id="filter-errors-all"
+				name="filter-errors"
 				label="All"
 				value="all"
-				checked={tableOptions.filterByType == 'all'}
-				onChange={handleFilterByType}
+				checked={tableOptions.filterByErrors == 'all'}
+				onChange={handleFilterByErrors}
 			/>
 			<Form.Check
 				inline
 				type="radio"
 				class="text-danger"
-				id="filter-type-errors"
-				name="filter-type"
+				id="filter-errors-errors"
+				name="filter-errors"
 				label="With errors"
 				value="errors"
-				checked={tableOptions.filterByType == 'errors'}
-				onChange={handleFilterByType}
+				checked={tableOptions.filterByErrors == 'errors'}
+				onChange={handleFilterByErrors}
 			/>
 			<Form.Check
 				inline
 				type="radio"
 				class="text-danger"
-				id="filter-type-errors-missing"
-				name="filter-type"
+				id="filter-errors-errors-missing"
+				name="filter-errors"
 				label="With errors + missing"
 				value="errors-plus-missing"
-				checked={tableOptions.filterByType == 'errors-plus-missing'}
-				onChange={handleFilterByType}
+				checked={tableOptions.filterByErrors == 'errors-plus-missing'}
+				onChange={handleFilterByErrors}
 			/>
 		</div>
 
@@ -200,6 +200,7 @@ const SwilibTargetAnalysisPage: Component = () => {
 					analysis={summaryAnalysis()!}
 					devices={devices()!}
 					onHide={() => setSelectedEntry(undefined)}
+					target={target()}
 				/>
 			}</Show>
 		</Show>

@@ -1,5 +1,6 @@
 import { Component, Show } from 'solid-js';
 import { SwilibEntryFlags } from "@/api/swilib";
+import { Badge } from "solid-bootstrap";
 
 interface SwilibEntryBadgesProps {
 	value: number;
@@ -9,30 +10,30 @@ export const SwilibEntryBadges: Component<SwilibEntryBadgesProps> = (props) => {
 	return (
 		<>
 			<Show when={props.value & SwilibEntryFlags.FROM_PATCH}>
-				<span
-					class="badge small rounded-pill bg-danger"
+				<Badge
+					class="rounded-pill bg-danger"
 					title="Function from patch. Don't use in ELFs!"
 				>
 					PATCH
-				</span>
+				</Badge>
 			</Show>
 
 			<Show when={props.value & SwilibEntryFlags.BUILTIN}>
-				<span
-					class="badge small rounded-pill bg-info"
+				<Badge
+					class="rounded-pill bg-info"
 					title="Built-in function from ELFLoader."
 				>
 					LOADER
-				</span>
+				</Badge>
 			</Show>
 
 			<Show when={props.value & SwilibEntryFlags.DIRTY}>
-				<span
-					class="badge small rounded-pill bg-danger"
+				<Badge
+					class="rounded-pill bg-danger"
 					title="Some phone models define this entry in swilib.vkp."
 				>
 					DIRTY
-				</span>
+				</Badge>
 			</Show>
 		</>
 	);

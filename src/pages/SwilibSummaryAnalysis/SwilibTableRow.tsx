@@ -27,7 +27,13 @@ export const SwilibTableRow: Component<SwilibTableRowProps> = (props) => {
 	};
 
 	return (
-		<tr class="cursor-pointer" onClick={handleClick} onKeyDown={handleKeyDown} tabindex="0" role="button">
+		<tr
+			class="cursor-pointer"
+			onClick={handleClick}
+			onKeyDown={handleKeyDown}
+			tabindex="0"
+			role="button"
+		>
 			<td classList={{'text-muted': props.entry.name == null}}>
 				{formatId(props.entry.id)}
 			</td>
@@ -36,7 +42,7 @@ export const SwilibTableRow: Component<SwilibTableRowProps> = (props) => {
 				<div class="d-flex justify-content-between align-items-center">
 					<div>
 						<SwilibEntryTypeBadge value={props.entry.type} />
-						<SwilibEntryName signature={props.entry.name} />
+						<SwilibEntryName entry={props.entry} />
 					</div>
 					<SwilibEntryBadges value={props.entry.flags}/>
 				</div>

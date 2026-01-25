@@ -1,9 +1,10 @@
-/* @refresh reload */
+import './App.scss';
 import { createSignal, ErrorBoundary, onCleanup, onMount, ParentComponent, Show } from "solid-js";
 import { Header } from "@/components/Layout/Header";
 import { Alert, Button, Container, Offcanvas } from "solid-bootstrap";
 import { Sidebar } from "@/components/Layout/Sidebar/Sidebar";
 import { ThemeProvider } from "@/context/ThemeProvider";
+import { usePreventClickAfterSelection } from "@/hooks/usePreventClickAfterSelection";
 
 export const App: ParentComponent = (props) => {
 	const [sidebarIsOffcanvas, setSidebarOffcanvas] = createSignal(false);
@@ -23,6 +24,8 @@ export const App: ParentComponent = (props) => {
 		handleWindowResize();
 		onCleanup(() => window.removeEventListener('resize', handleWindowResize));
 	});
+
+	usePreventClickAfterSelection(document.body);
 
 	return (
 		<ThemeProvider>
@@ -47,7 +50,7 @@ export const App: ParentComponent = (props) => {
 						</Offcanvas>
 					</Show>
 
-					<main class="flex-fill p-3 pt-3">
+					<main class="main-content">
 						<ErrorBoundary fallback={(error, reset) => {
 							console.error(error);
 							return (

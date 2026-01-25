@@ -26,21 +26,21 @@ export const SwilibTable: Component<SwilibTableProps> = (props) => {
 	const entries = createMemo(() => {
 		const sortAsc = primarySortOrder() == 'ASC';
 		const filterByFile = props.file;
-		const filterByType = tableOptions.filterByType;
+		const filterByErrors = tableOptions.filterByErrors;
 
 		const filterEntries = (entry: SummarySwilibAnalysisEntry): boolean => {
 			if (filterByFile != 'swilib.h' && entry.file != filterByFile)
 				return false;
 			const targetEntry = props.targetAnalysis.entries[entry.id];
-			if (filterByType == 'errors') {
+			if (filterByErrors == 'errors') {
 				return !!targetEntry?.error;
-			} else if (filterByType == 'errors-plus-missing') {
+			} else if (filterByErrors == 'errors-plus-missing') {
 				return !!targetEntry?.error || !!targetEntry?.missing;
 			}
 			return true;
 		};
 
-		const entries = filterByFile != 'swilib.h' || filterByType != 'all' ?
+		const entries = filterByFile != 'swilib.h' || filterByErrors != 'all' ?
 			props.analysis.entries.filter(filterEntries) :
 			props.analysis.entries;
 		return entries.toSorted((a, b) => sortAsc ? a.id - b.id : b.id - a.id);

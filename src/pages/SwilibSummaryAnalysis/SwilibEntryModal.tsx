@@ -1,45 +1,72 @@
-import { Component, createMemo, createSignal, For, Show } from "solid-js";
-import { Modal } from "solid-bootstrap";
+import { Component, createMemo, createSignal, For, Match, Show, Switch } from "solid-js";
+import { Badge, Modal } from "solid-bootstrap";
 import { SwilibEntryBadges } from "@/components/Swilib/SwilibEntryBadges";
 import { SwilibEntryWarnings } from "@/components/Swilib/SwilibEntryWarnings";
-import { SummarySwilibAnalysis, SummarySwilibAnalysisEntry, SWILIB_PLATFORMS, SwilibDevice } from "@/api/swilib";
-import { formatId } from "@/utils/format";
+import {
+	getCoverageValue,
+	SummarySwilibAnalysis,
+	SummarySwilibAnalysisEntry,
+	SWILIB_PLATFORMS,
+	SwilibDevice
+} from "@/api/swilib";
+import { formatAddress, formatId } from "@/utils/format";
 import { HighlightCode } from "@/components/Utils/HighlightCode";
+import clsx from "clsx";
 
 interface SwilibEntryModalProps {
 	entry: SummarySwilibAnalysisEntry;
 	analysis: SummarySwilibAnalysis;
 	devices: SwilibDevice[];
+	target?: string;
 	onHide: () => void;
 }
 
 export const SwilibEntryModal: Component<SwilibEntryModalProps> = (props) => {
 	const coverageMatrix = createMemo(() => {
-		const coverage: Record<string, Array<{ target: string, isSupported: boolean }>> = {};
+		const matrix: Record<string, Array<{ target: string, coverage: number, value?: number }>> = {};
 		for (const device of props.devices) {
-			coverage[device.platform] = coverage[device.platform] ?? [];
-			coverage[device.platform].push({
+			const platformCoverage = props.entry.coverage[device.platform];
+			const value = props.entry.values[device.target];
+			const coverage = getCoverageValue(platformCoverage, props.entry.targets.includes(device.target));
+			matrix[device.platform] = matrix[device.platform] ?? [];
+			matrix[device.platform].push({
 				target: device.target,
-				isSupported: props.entry.targets.includes(device.target)
+				coverage,
+				value
 			});
 		}
-		return coverage;
+		return matrix;
 	});
+	const value = () => props.target ? props.entry.values[props.target] : undefined;
 	const coverageMatrixWidth = () => Math.max(...Object.values(coverageMatrix()).map((row) => row.length));
 	const [showModal, setShowModal] = createSignal(true);
+	const unusedLabel = () => props.entry.file == 'swilib/unused.h' ? 'Unused' : 'Reserved by ELFLoader';
+
+	const getClassByCoverage = (coverage: number) => {
+		const coverageToClass: Record<number, string> = {
+			[-200]: 'text-secondary',
+			[0]: 'text-danger',
+			[100]: 'text-success',
+			[200]: 'text-info'
+		};
+		return coverageToClass[coverage] ?? '';
+	};
 
 	return (
 		<Modal size="lg" centered show={showModal()} onHide={() => setShowModal(false)} onExited={props.onHide}>
 			<Modal.Header closeButton>
-				<Modal.Title class="d-flex align-items-center">
-					<span class="me-3">
-						<b>ID:</b> {formatId(props.entry.id)}, <b>offset:</b> {formatId(props.entry.id * 4)}
+				<Modal.Title class="d-flex align-items-center gap-3">
+					<span>
+						<b>ID:</b> {formatId(props.entry.id)} / +{formatId(props.entry.id * 4)}{' '}
 					</span>
+					<Show when={value()}>{(value) =>
+						<Badge class="bg-secondary">{formatAddress(value())}</Badge>
+					}</Show>
 					<SwilibEntryBadges value={props.entry.flags}/>
 				</Modal.Title>
 			</Modal.Header>
 			<Modal.Body>
-				<HighlightCode language="c" code={props.entry.name ?? "/* Unused */"} />
+				<HighlightCode language="c" code={props.entry.name ?? `/* ${unusedLabel()} */`} />
 
 				<div class="my-3">
 					<SwilibEntryWarnings value={props.entry.flags}/>
@@ -61,16 +88,18 @@ export const SwilibEntryModal: Component<SwilibEntryModalProps> = (props) => {
 							<tr>
 								<th>{platform}</th>
 								<For each={coverageMatrix()[platform]}>{(row) =>
-									<td>
-										<Show when={row.isSupported} fallback={
-											<div class="text-danger">
-												<i class="bi bi-x-circle-fill"></i> {row.target}
-											</div>
+									<td class={clsx('text-center', getClassByCoverage(row.coverage))}>
+										<b>{row.target}</b><br />
+										<Switch fallback={
+											<small>{row.value != null ? formatAddress(row.value) : '-'}</small>
 										}>
-											<div class="text-success">
-												<i class="bi bi-check-circle-fill"></i> {row.target}
-											</div>
-										</Show>
+											<Match when={row.coverage == 200}>
+												<small>built-in</small>
+											</Match>
+											<Match when={row.coverage == -200}>
+												<small>not avail</small>
+											</Match>
+										</Switch>
 									</td>
 								}</For>
 								<Show when={coverageMatrix()[platform].length < coverageMatrixWidth()}>

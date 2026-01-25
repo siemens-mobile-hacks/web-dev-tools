@@ -6,8 +6,8 @@
 	"scripts": {
 		"start": "vite",
 		"dev": "vite",
-		"build": "vite build",
-		"serve": "vite preview",
+		"build": "tsc && vite build",
+		"serve": "tsc && vite preview",
 		"gh-pages-build": "vite build --base=/web-dev-tools"
 	},
 	"license": "MIT",
@@ -19,6 +19,13 @@
 		"vite-plugin-solid-svg": "^0.8.1"
 	},
 	"dependencies": {
+		"@codemirror/autocomplete": "^6.20.0",
+		"@codemirror/commands": "^6.10.1",
+		"@codemirror/language": "^6.12.1",
+		"@codemirror/lint": "^6.9.2",
+		"@codemirror/search": "^6.6.0",
+		"@codemirror/state": "^6.5.4",
+		"@codemirror/view": "^6.39.11",
 		"@material-design-icons/svg": "^0.14.15",
 		"@solid-primitives/context": "^0.3.2",
 		"@solidjs/router": "^0.15.4",

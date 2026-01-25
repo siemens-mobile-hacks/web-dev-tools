@@ -31,6 +31,7 @@ export interface SummarySwilibAnalysisEntry {
 	type: SwilibEntryType;
 	coverage: Record<string, number>;
 	patterns: Record<string, string>;
+	values: Record<string, number>;
 	targets: string[];
 }
 
@@ -103,11 +104,15 @@ export function getPatternsCoverage(patterns: Record<string, string>, coverage: 
 	const patternsCoverage: Record<string, number> = {};
 	for (const platform of SWILIB_PLATFORMS) {
 		const platformCoverage = coverage[platform] ?? 0;
-		if (platformCoverage < 0 || platformCoverage > 100) {
-			patternsCoverage[platform] = platformCoverage;
-		} else {
-			patternsCoverage[platform] = patterns[platform] ? 100 : 0;
-		}
+		patternsCoverage[platform] = getCoverageValue(platformCoverage, platform in patterns);
 	}
 	return patternsCoverage;
+}
+
+export function getCoverageValue(platformCoverage: number, isExist: boolean) {
+	if (platformCoverage < 0 || platformCoverage > 100) {
+		return platformCoverage;
+	} else {
+		return isExist ? 100 : 0;
+	}
 }

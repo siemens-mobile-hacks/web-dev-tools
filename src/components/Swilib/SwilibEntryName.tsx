@@ -1,12 +1,13 @@
 import { Component, createMemo, Show } from 'solid-js';
+import { SummarySwilibAnalysisEntry } from "@/api/swilib";
 
 interface SwilibEntryNameProps {
-	signature: string | null;
+	entry: SummarySwilibAnalysisEntry;
 }
 
 export const SwilibEntryName: Component<SwilibEntryNameProps> = (props) => {
 	const signature = createMemo(() => {
-		const matched = props.signature?.trim().match(/^(.*?)\s+([*]+)?(\w+)\s*\((.+?)?\)$/is);
+		const matched = props.entry.name?.trim().match(/^(.*?)\s+([*]+)?(\w+)\s*\((.+?)?\)$/is);
 		if (matched) {
 			return {
 				returnType: `${matched[1]}\xA0${matched[2] || ""}`,
@@ -16,8 +17,10 @@ export const SwilibEntryName: Component<SwilibEntryNameProps> = (props) => {
 		}
 		return undefined;
 	});
+	const unusedLabel = () => props.entry.file == 'swilib/unused.h' ? 'Unused' : 'Reserved by ELFLoader';
+
 	return (
-		<Show when={signature()} fallback={props.signature ?? <small class="text-muted">Unused.</small>}>
+		<Show when={signature()} fallback={props.entry.name ?? <small class="text-muted">{unusedLabel()}</small>}>
 			<small class="text-muted">
 				{signature()?.returnType}
 			</small>

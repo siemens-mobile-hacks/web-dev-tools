@@ -1,8 +1,9 @@
 import { Component, createEffect, createMemo, For, on } from "solid-js";
 import { TableSortButton } from "@/components/TableSortButton";
-import { SummarySwilibAnalysis, SummarySwilibAnalysisEntry, SWILIB_PLATFORMS } from "@/api/swilib";
+import { SummarySwilibAnalysis, SummarySwilibAnalysisEntry, SWILIB_PLATFORMS, SwilibEntryFlags } from "@/api/swilib";
 import { useSwilibTableOptionsStore } from "@/store/swilibTableOptionsStore";
 import { SwilibTableRow } from "@/pages/SwilibSummaryAnalysis/SwilibTableRow";
+import clsx from "clsx";
 
 interface SwilibTableProps {
 	file: string;
@@ -20,8 +21,20 @@ export const SwilibTable: Component<SwilibTableProps> = (props) => {
 	const entries = createMemo(() => {
 		const sortAsc = primarySortOrder() == 'ASC';
 		const filterByFile = props.file;
-		const entries = filterByFile != 'swilib.h' ?
-			props.analysis.entries.filter((entry) => entry.file == filterByFile) :
+		const filterByType = tableOptions.filterByType;
+
+		const filterEntries = (entry: SummarySwilibAnalysisEntry): boolean => {
+			if (filterByFile != 'swilib.h' && entry.file != filterByFile)
+				return false;
+			if (filterByType == 'unused' && entry.file != "swilib/unused.h")
+				return false;
+			if (filterByType == 'dirty' && !(entry.flags & SwilibEntryFlags.DIRTY))
+				return false;
+			return true;
+		};
+
+		const entries = filterByFile != 'swilib.h' || filterByType != 'all' ?
+			props.analysis.entries.filter(filterEntries) :
 			props.analysis.entries;
 		return entries.toSorted((a, b) => sortAsc ? a.id - b.id : b.id - a.id);
 	});
@@ -33,7 +46,7 @@ export const SwilibTable: Component<SwilibTableProps> = (props) => {
 	));
 
 	return (
-		<div>
+		<div class={clsx(entries().length == 0 && 'd-none')}>
 			<h4 onClick={() => setCollapsed(!isCollapsed())} class="user-select-none cursor-pointer">
 				<i class={`bi ${isCollapsed() ? 'bi-plus-square' : 'bi-dash-square'}`}></i> {' '}
 				{props.file}

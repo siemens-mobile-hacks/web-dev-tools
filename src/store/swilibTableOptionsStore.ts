@@ -12,7 +12,8 @@ const tableOptionsStore = createRoot(() =>
 		coverageType: 'SWI',
 		groupIsCollapsed: {} as Record<string, boolean>,
 		groupPrimarySort: {} as Record<string, 'ASC' | 'DESC'>,
-		filterByType: 'all'
+		filterByErrors: 'all',
+		filterByType: 'all',
 	}), { name: 'swilibTableOptions' })
 );
 

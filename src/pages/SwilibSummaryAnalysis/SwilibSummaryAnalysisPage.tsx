@@ -16,6 +16,11 @@ const SwilibSummaryAnalysisPage: Component = () => {
 	const groups = () => tableOptions.groupByFile ? summaryAnalysis()?.files : ['swilib.h'];
 	const [selectedEntry, setSelectedEntry] = createSignal<SummarySwilibAnalysisEntry>();
 
+	const handleFilterByType = (e: Event & { currentTarget: HTMLInputElement }) => {
+		if (e.currentTarget.checked)
+			setTableOptions("filterByType", e.currentTarget.value);
+	};
+
 	return <>
 		<div class="mb-2">
 			<div class="mb-2">
@@ -79,6 +84,41 @@ const SwilibSummaryAnalysisPage: Component = () => {
 				value="PTR"
 				checked={tableOptions.coverageType == 'PTR'}
 				onChange={(e) => e.currentTarget.checked && setTableOptions("coverageType", e.currentTarget.value)}
+			/>
+		</div>
+
+		<div class="d-flex flex-row mb-3">
+			<span class="me-3"><i class="bi bi-funnel"></i> Filter functions:</span>
+			<Form.Check
+				inline
+				type="radio"
+				name="filter-type"
+				id="filter-type-all"
+				label="All"
+				value="all"
+				checked={tableOptions.filterByType == 'all'}
+				onChange={handleFilterByType}
+			/>
+			<Form.Check
+				inline
+				type="radio"
+				name="filter-type"
+				id="filter-type-unused"
+				label="Unused"
+				value="unused"
+				checked={tableOptions.filterByType == 'unused'}
+				onChange={handleFilterByType}
+			/>
+			<Form.Check
+				inline
+				type="radio"
+				class="text-danger"
+				name="filter-type"
+				id="filter-type-dirty"
+				label="Dirty"
+				value="dirty"
+				checked={tableOptions.filterByType == 'dirty'}
+				onChange={handleFilterByType}
 			/>
 		</div>
 
