@@ -31,13 +31,10 @@ const SwilibCheckPage: Component = () => {
 		<div class="d-flex flex-column h-100 gap-3">
 			<Row class="align-items-center justify-content-sm-between">
 				<Col xs="auto">
-					<Form.Label htmlFor="inlineFormInput" visuallyHidden>
-						Name
-					</Form.Label>
-					<Form.Control type="file" onInput={handleInput} accept=".vkp" />
-				</Col>
-				<Col xs="auto">
 					<Row>
+						<Col xs="auto">
+							<Button type="submit" onClick={handleSubmit}>Check swilib.vkp</Button>
+						</Col>
 						<Col xs="auto">
 							<Form.Select value={platform()} onChange={(e) => setPlatform(e.currentTarget.value)}>
 								<For each={SWILIB_PLATFORMS}>{(platform) =>
@@ -45,10 +42,10 @@ const SwilibCheckPage: Component = () => {
 								}</For>
 							</Form.Select>
 						</Col>
-						<Col xs="auto">
-							<Button type="submit" onClick={handleSubmit}>Check swilib.vkp</Button>
-						</Col>
 					</Row>
+				</Col>
+				<Col xs="auto">
+					<Form.Control type="file" onInput={handleInput} accept=".vkp" />
 				</Col>
 			</Row>
 			<CodeMirror
