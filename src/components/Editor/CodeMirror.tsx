@@ -1,5 +1,6 @@
-import { Component, onCleanup, onMount } from "solid-js";
-import { EditorState } from "@codemirror/state";
+import "./CodeMirror.scss";
+import { Component, createEffect, createMemo, onCleanup, onMount } from "solid-js";
+import { Compartment, EditorState, Extension } from "@codemirror/state";
 import {
 	crosshairCursor,
 	drawSelection,
@@ -12,26 +13,46 @@ import {
 	lineNumbers,
 	rectangularSelection
 } from "@codemirror/view";
-import {
-	bracketMatching,
-	defaultHighlightStyle,
-	foldGutter,
-	foldKeymap,
-	indentOnInput,
-	syntaxHighlighting
-} from "@codemirror/language";
-import { defaultKeymap, history, historyKeymap } from "@codemirror/commands";
+import { bracketMatching, foldGutter, foldKeymap, indentOnInput } from "@codemirror/language";
+import { defaultKeymap, history, historyKeymap, indentLess, indentMore } from "@codemirror/commands";
 import { highlightSelectionMatches, searchKeymap } from "@codemirror/search";
 import { autocompletion, closeBrackets, closeBracketsKeymap, completionKeymap } from "@codemirror/autocomplete";
 import { lintKeymap } from "@codemirror/lint";
+import { useTheme } from "@/context/ThemeProvider";
+import { xcodeDark, xcodeLight } from "@uiw/codemirror-theme-xcode";
 
-export const CodeMirror: Component = () => {
+interface CodeMirrorProps {
+	extensions?: Extension[];
+	value?: string;
+	defaultValue?: string;
+	onChange?: (content: string) => void;
+}
+
+export const CodeMirror: Component<CodeMirrorProps> = (props) => {
 	let view: EditorView;
 	let parentRef!: HTMLDivElement;
+	let currentValue = "";
+	const themeCompartment = new Compartment();
+	const extensionsCompartments = new Compartment();
+
+	const { effectiveTheme } = useTheme();
+
+	const editorTheme = createMemo(() => {
+		return effectiveTheme() == "dark" ? [xcodeDark] : [xcodeLight];
+	});
+
+	const updateListener = EditorView.updateListener.of((update) => {
+		if (update.docChanged) {
+			currentValue = update.state.doc.toString();
+			props.onChange && props.onChange(currentValue);
+		}
+	});
 
 	onMount(() => {
+		currentValue = props.value ?? props.defaultValue ?? "";
+
 		view = new EditorView({
-			doc: "Start document",
+			doc: currentValue,
 			parent: parentRef,
 			extensions: [
 				// A line number gutter
@@ -51,7 +72,7 @@ export const CodeMirror: Component = () => {
 				// Re-indent lines when typing specific input
 				indentOnInput(),
 				// Highlight syntax with a default style
-				syntaxHighlighting(defaultHighlightStyle),
+				//syntaxHighlighting(defaultHighlightStyle),
 				// Highlight matching brackets near the cursor
 				bracketMatching(),
 				// Automatically close brackets
@@ -68,7 +89,6 @@ export const CodeMirror: Component = () => {
 				highlightActiveLineGutter(),
 				// Highlight text that matches the selected text
 				highlightSelectionMatches(),
-				// codemirrorVkpLanguageExtension(),
 				keymap.of([
 					// Closed-bracket-aware backspace
 					...closeBracketsKeymap,
@@ -83,16 +103,54 @@ export const CodeMirror: Component = () => {
 					// Autocompletion keys
 					...completionKeymap,
 					// Keys related to the linter system
-					...lintKeymap
+					...lintKeymap,
+					{
+						key: "Tab",
+						preventDefault: true,
+						run: indentMore,
+					},
+					{
+						key: "Shift-Tab",
+						preventDefault: true,
+						run: indentLess,
+					},
 				]),
-				EditorView.theme({ '&': { height: '100%' } })
+				EditorView.theme({
+					'&': {
+						flex: '1 1 auto',
+						minHeight: '0',
+						minWidth: '0',
+						border: '1px solid var(--bs-content-separator)',
+						outline: 'none'
+					},
+					'&.cm-focused': {
+						outline: 'none'
+					}
+				}),
+				extensionsCompartments.of(props.extensions ?? []),
+				themeCompartment.of(editorTheme()),
+				updateListener,
 			]
 		});
 	});
 
 	onCleanup(() => view.destroy());
 
-	return (
-		<div ref={parentRef}></div>
-	);
+	createEffect(() => view.dispatch({
+		effects: themeCompartment.reconfigure(editorTheme())
+	}));
+
+	createEffect(() => view.dispatch({
+		effects: extensionsCompartments.reconfigure(props.extensions ?? [])
+	}));
+
+	createEffect(() => {
+		if (props.value != null && props.value !== currentValue) {
+			console.warn("CodeMirror value changed outside of component. Updating...");
+			currentValue = props.value ?? "";
+			view.dispatch({ changes: { from: 0, to: view.state.doc.length, insert: currentValue } });
+		}
+	});
+
+	return (<div class="cm-wrapper" ref={parentRef}></div>);
 }

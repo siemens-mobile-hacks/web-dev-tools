@@ -1,10 +1,11 @@
 import './App.scss';
 import { createSignal, ErrorBoundary, onCleanup, onMount, ParentComponent, Show } from "solid-js";
 import { Header } from "@/components/Layout/Header";
-import { Alert, Button, Container, Offcanvas } from "solid-bootstrap";
+import { Container, Offcanvas } from "solid-bootstrap";
 import { Sidebar } from "@/components/Layout/Sidebar/Sidebar";
 import { ThemeProvider } from "@/context/ThemeProvider";
 import { usePreventClickAfterSelection } from "@/hooks/usePreventClickAfterSelection";
+import { AppError } from "@/components/Layout/App/AppError";
 
 export const App: ParentComponent = (props) => {
 	const [sidebarIsOffcanvas, setSidebarOffcanvas] = createSignal(false);
@@ -25,7 +26,7 @@ export const App: ParentComponent = (props) => {
 		onCleanup(() => window.removeEventListener('resize', handleWindowResize));
 	});
 
-	usePreventClickAfterSelection(document.body);
+	usePreventClickAfterSelection();
 
 	return (
 		<ThemeProvider>
@@ -51,20 +52,7 @@ export const App: ParentComponent = (props) => {
 					</Show>
 
 					<main class="main-content">
-						<ErrorBoundary fallback={(error, reset) => {
-							console.error(error);
-							return (
-								<Alert variant="danger">
-									<Alert.Heading>Page loading error</Alert.Heading>
-									<p>
-										{error.message} ({error.name})
-									</p>
-									<Button onClick={() => reset()} variant="outline-danger">
-										Try again
-									</Button>
-								</Alert>
-							);
-						}}>
+						<ErrorBoundary fallback={(error, reset) => <AppError error={error} reset={reset} />}>
 							{props.children}
 						</ErrorBoundary>
 					</main>

@@ -18,7 +18,7 @@ export const Sidebar: Component<SidebarProps> = (props) => {
 			title: "Functions library",
 			links: [
 				{ label: "Swilib analysis", href: "/swilib/analysis/summary", icon: "bi bi-activity" },
-				{ label: "Check swilib.vkp", href: "/swilib/check", icon: "bi bi-file-earmark-check", disabled: true },
+				{ label: "Check swilib.vkp", href: "/swilib/check", icon: "bi bi-file-earmark-check" },
 				{ label: "Merge swilib.vkp", href: "/swilib/merge", icon: "bi bi-arrow-left-right", disabled: true }
 			]
 		},

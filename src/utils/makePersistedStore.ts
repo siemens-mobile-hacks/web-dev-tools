@@ -17,6 +17,7 @@ export interface PersistentStoreOptions<T> {
 	migrate?: (persistedState: T, version: number) => T;
 	merge?: (persistedState: T, currentState: T) => T;
 	skipLoad?: boolean;
+	debounce?: number;
 }
 
 export function makePersistedStore<T>(store: [Store<T>, SetStoreFunction<T>], options: PersistentStoreOptions<T>): PersistentStore<T> {
@@ -29,6 +30,7 @@ export function makePersistedStore<T>(store: [Store<T>, SetStoreFunction<T>], op
 		serialize = JSON.stringify,
 		deserialize = JSON.parse,
 		skipLoad,
+		debounce: debounceInterval = 0,
 	} = options;
 
 	const storedValue = skipLoad ? null : storage.getItem(name);
@@ -51,7 +53,7 @@ export function makePersistedStore<T>(store: [Store<T>, SetStoreFunction<T>], op
 			state: unwrap(store[0]) as unknown,
 		} as PersistentStoreInternal);
 		storage.setItem(name, serialized);
-	}, 0);
+	}, debounceInterval);
 
 	const setWithPersistence: SetStoreFunction<T> = (...args: any) => {
 		(store[1] as any)(...args);

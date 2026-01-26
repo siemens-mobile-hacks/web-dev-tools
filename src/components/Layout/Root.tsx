@@ -1,5 +1,5 @@
 import { type Component, ErrorBoundary, lazy } from "solid-js";
-import { App } from "@/components/Layout/App";
+import { App } from "@/components/Layout/App/App";
 import { Navigate, Route, Router } from "@solidjs/router";
 
 const SwilibSummaryAnalysisPage = lazy(() => import("@/pages/SwilibSummaryAnalysis/SwilibSummaryAnalysisPage"));

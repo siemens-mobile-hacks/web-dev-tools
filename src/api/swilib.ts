@@ -80,6 +80,11 @@ export async function getTargetSwilibAnalysis(target: string) {
 	return response.data;
 }
 
+export async function getTargetSwilibCustomAnalysis(target: string, code: string) {
+	const response = await apiClient.post<TargetSwilibAnalysis>(`/api/swilib/analyze/${target}`, { code });
+	return response.data;
+}
+
 export async function getSummarySwilibAnalysis() {
 	const response = await apiClient.get<SummarySwilibAnalysis>(`/api/swilib/analyze/all`);
 	return response.data;

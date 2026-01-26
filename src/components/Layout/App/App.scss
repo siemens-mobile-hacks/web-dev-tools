@@ -1,0 +1,7 @@
+.main-content {
+	flex: 1;
+	min-width: 0;
+	padding: 1rem;
+	min-height: calc(100dvh - var(--bs-header-height));
+	box-sizing: border-box;
+}

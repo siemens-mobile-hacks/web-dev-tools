@@ -7,21 +7,31 @@ import {
 	getAvailableSwilibDevices,
 	getSummarySwilibAnalysis,
 	getTargetSwilibAnalysis,
+	getTargetSwilibCustomAnalysis,
 	SummarySwilibAnalysisEntry,
+	SWILIB_PLATFORMS,
 } from "@/api/swilib";
 import { SwilibStatistic } from "@/pages/SwilibTargetAnalysis/SwilibStatistic";
 import { BACKEND_URL } from "@/utils/env";
 import { SwilibTable } from "@/pages/SwilibTargetAnalysis/SwilibTable";
 import { SwilibEntryModal } from "@/pages/SwilibSummaryAnalysis/SwilibEntryModal";
 import { useResourcesState } from "@/hooks/useResourcesState";
+import { useTemporaryFilesStore } from "@/store/temporaryFiles";
 
 const SwilibTargetAnalysisPage: Component = () => {
 	const [searchParams] = useSearchParams<{ model: string; target: string }>();
 	const [tableOptions, setTableOptions] = useSwilibTableOptionsStore();
+	const [temporaryFiles] = useTemporaryFilesStore();
 	const target = () => searchParams.target ?? searchParams.model ?? '';
 	const [devices] = createResource(getAvailableSwilibDevices);
 	const [summaryAnalysis] = createResource(getSummarySwilibAnalysis);
-	const [targetAnalysis] = createResource(target, (target) => getTargetSwilibAnalysis(target));
+	const [targetAnalysis] = createResource(target, (target) => {
+		if (SWILIB_PLATFORMS.includes(target)) {
+			return getTargetSwilibCustomAnalysis(target, temporaryFiles.swilibVkp);
+		} else {
+			return getTargetSwilibAnalysis(target);
+		}
+	});
 
 	const resourcesState = useResourcesState([devices, summaryAnalysis, targetAnalysis]);
 
@@ -54,7 +64,11 @@ const SwilibTargetAnalysisPage: Component = () => {
 
 	return <>
 		<div class="mb-2">
-			<SwilibTargetsTabs selected={target()} devices={devices()} />
+			<Show when={!SWILIB_PLATFORMS.includes(target())} fallback={
+				<div class="text-secondary">Analysis of uploaded swilib.vkp (for {target()})</div>
+			}>
+				<SwilibTargetsTabs selected={target()} devices={devices()} />
+			</Show>
 		</div>
 
 		<div class="d-flex justify-content-start mb-3">
