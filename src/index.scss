@@ -58,10 +58,6 @@ body {
 	overflow-y: scroll;
 }
 
-.form-check {
-	user-select: none;
-}
-
 .table-sticky-header {
 	thead tr {
 		position: sticky;
@@ -88,6 +84,12 @@ body {
 	--bs-header-height: 47px;
 }
 
+.nav-tabs {
+	.nav-link.active {
+		border-bottom-color: var(--bs-nav-tabs-link-active-bg);
+	}
+}
+
 /* Light theme fixes */
 @include color-mode(light) {
 	--bs-content-separator: #dfe0df;
@@ -112,6 +114,12 @@ body {
 	--sidebar-link-active-color: #669df1;
 
 	--sidebar-link-hover-bg: #242528;
+
+	.nav-tabs {
+		&--theme-editor {
+			--bs-nav-tabs-link-active-bg: #292a30;
+		}
+	}
 
 	table {
 		--bs-table-border-color: #4b4d51;

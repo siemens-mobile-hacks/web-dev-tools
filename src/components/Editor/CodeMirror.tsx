@@ -20,12 +20,14 @@ import { autocompletion, closeBrackets, closeBracketsKeymap, completionKeymap } 
 import { lintKeymap } from "@codemirror/lint";
 import { useTheme } from "@/context/ThemeProvider";
 import { xcodeDark, xcodeLight } from "@uiw/codemirror-theme-xcode";
+import clsx from "clsx";
 
 interface CodeMirrorProps {
 	extensions?: Extension[];
 	value?: string;
 	defaultValue?: string;
 	onChange?: (content: string) => void;
+	hidden?: boolean;
 }
 
 export const CodeMirror: Component<CodeMirrorProps> = (props) => {
@@ -121,6 +123,7 @@ export const CodeMirror: Component<CodeMirrorProps> = (props) => {
 						minHeight: '0',
 						minWidth: '0',
 						border: '1px solid var(--bs-content-separator)',
+						borderTopWidth: '0',
 						outline: 'none'
 					},
 					'&.cm-focused': {
@@ -152,5 +155,10 @@ export const CodeMirror: Component<CodeMirrorProps> = (props) => {
 		}
 	});
 
-	return (<div class="cm-wrapper" ref={parentRef}></div>);
+	createEffect(() => {
+		if (!props.hidden)
+			view.requestMeasure();
+	});
+
+	return (<div class={clsx("cm-wrapper", props.hidden && "d-none")} ref={parentRef}></div>);
 }

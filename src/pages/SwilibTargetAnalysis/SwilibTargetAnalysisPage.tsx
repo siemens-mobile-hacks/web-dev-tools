@@ -4,6 +4,7 @@ import { Button, Dropdown, Form, Spinner } from 'solid-bootstrap';
 import { SwilibTargetsTabs } from '@/components/Swilib/SwilibTargetsTabs';
 import { useSwilibTableOptionsStore } from "@/store/swilibTableOptionsStore";
 import {
+	downloadSwilibAs,
 	getAvailableSwilibDevices,
 	getSummarySwilibAnalysis,
 	getTargetSwilibAnalysis,
@@ -12,13 +13,14 @@ import {
 	SWILIB_PLATFORMS,
 } from "@/api/swilib";
 import { SwilibStatistic } from "@/pages/SwilibTargetAnalysis/SwilibStatistic";
-import { BACKEND_URL } from "@/utils/env";
 import { SwilibTable } from "@/pages/SwilibTargetAnalysis/SwilibTable";
 import { SwilibEntryModal } from "@/pages/SwilibSummaryAnalysis/SwilibEntryModal";
 import { useResourcesState } from "@/hooks/useResourcesState";
 import { useTemporaryFilesStore } from "@/store/temporaryFiles";
+import { downloadBlob } from "@/utils/download";
 
 const SwilibTargetAnalysisPage: Component = () => {
+	const [isDownloading, setIsDownloading] = createSignal(false);
 	const [searchParams] = useSearchParams<{ model: string; target: string }>();
 	const [tableOptions, setTableOptions] = useSwilibTableOptionsStore();
 	const [temporaryFiles] = useTemporaryFilesStore();
@@ -46,21 +48,32 @@ const SwilibTargetAnalysisPage: Component = () => {
 	const downloadLinks = createMemo(() => ([
 		{
 			label: <>V-Klay patch <b>.vkp</b></>,
-			href: `${BACKEND_URL}/api/swilib/download/${target()}/swilib_${target()}.vkp`
+			format: 'vkp'
 		},
 		{
 			label: <>Binary library <b>.blib</b></>,
-			href: `${BACKEND_URL}/api/swilib/download/${target()}/swilib_${target()}.blib`
+			format: 'blib'
 		},
 		{
 			label: <>Ghidra symbols <b>.txt</b></>,
-			href: `${BACKEND_URL}/api/swilib/download/${target()}/symbols-${target()}.txt`
+			format: 'txt'
 		},
 		{
 			label: <>IDA Pro symbols <b>.idc</b></>,
-			href: `${BACKEND_URL}/api/swilib/download/${target()}/symbols-${target()}.idc`
+			format: 'idc'
 		},
 	]));
+
+	const handleSwilibDownload = async (format: string) => {
+		try {
+			setIsDownloading(true);
+			const code = SWILIB_PLATFORMS.includes(target()) ? temporaryFiles.swilibVkp : undefined;
+			const {blob, name} = await downloadSwilibAs(target(), format, code);
+			downloadBlob(blob, name);
+		} finally {
+			setIsDownloading(false);
+		}
+	};
 
 	return <>
 		<div class="mb-2">
@@ -164,12 +177,12 @@ const SwilibTargetAnalysisPage: Component = () => {
 
 		<div class="d-flex flex-row mb-3 gap-2">
 			<Dropdown>
-				<Dropdown.Toggle variant="outline-success" size="sm">
+				<Dropdown.Toggle variant="outline-success" size="sm" disabled={isDownloading()}>
 					<i class="bi bi-download"></i> Download as …
 				</Dropdown.Toggle>
 				<Dropdown.Menu>
 					<For each={downloadLinks()}>{(link) => <>
-						<Dropdown.Item href={link.href}>
+						<Dropdown.Item onClick={() => handleSwilibDownload(link.format)}>
 							<i class="bi bi-download"></i> {link.label}
 						</Dropdown.Item>
 					</>}</For>

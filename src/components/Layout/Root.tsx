@@ -5,6 +5,8 @@ import { Navigate, Route, Router } from "@solidjs/router";
 const SwilibSummaryAnalysisPage = lazy(() => import("@/pages/SwilibSummaryAnalysis/SwilibSummaryAnalysisPage"));
 const SwilibTargetAnalysisPage = lazy(() => import("@/pages/SwilibTargetAnalysis/SwilibTargetAnalysisPage"));
 const SwilibCheckPage = lazy(() => import("@/pages/SwilibCheck/SwilibCheckPage"));
+const SwilibMergePage = lazy(() => import("@/pages/SwilibMerge/SwilibMergePage"));
+const SwilibMergeEditorPage = lazy(() => import("@/pages/SwilibMerge/SwilibMergeEditorPage"));
 const ReFilesPage = lazy(() => import("@/pages/ReFiles/ReFilesPage"));
 
 export const Root: Component = () => {
@@ -20,6 +22,8 @@ export const Root: Component = () => {
 				<Route path="/swilib/analysis/summary" component={SwilibSummaryAnalysisPage} />
 				<Route path="/swilib/analysis/target" component={SwilibTargetAnalysisPage} />
 				<Route path="/swilib/check" component={SwilibCheckPage} />
+				<Route path="/swilib/merge" component={SwilibMergePage} />
+				<Route path="/swilib/merge/editor" component={SwilibMergeEditorPage} />
 				<Route path="/re/symbols" component={ReFilesPage} />
 
 				{/* Legacy routes */}

@@ -66,6 +66,28 @@ export interface TargetSwilibAnalysis {
 	coverage: Record<string, number>;
 }
 
+export enum SwilibDiffAction {
+	LEFT,
+	RIGHT,
+	ASK,
+	DELETE,
+	SKIP,
+}
+
+export interface SwilibEntryDiffSide {
+	value: number;
+	error?: string;
+}
+
+export interface SwilibEntryDiff {
+	id: number;
+	name?: string;
+	symbol?: string;
+	left?: SwilibEntryDiffSide;
+	right?: SwilibEntryDiffSide;
+	action: SwilibDiffAction;
+}
+
 export interface CpuSymbolsFile {
 	name: string;
 	ida: string;
@@ -80,8 +102,8 @@ export async function getTargetSwilibAnalysis(target: string) {
 	return response.data;
 }
 
-export async function getTargetSwilibCustomAnalysis(target: string, code: string) {
-	const response = await apiClient.post<TargetSwilibAnalysis>(`/api/swilib/analyze/${target}`, { code });
+export async function getTargetSwilibCustomAnalysis(platform: string, code: string) {
+	const response = await apiClient.post<TargetSwilibAnalysis>(`/api/swilib/analyze`, { code, platform });
 	return response.data;
 }
 
@@ -98,6 +120,28 @@ export async function getAvailableSwilibDevices() {
 		},
 	});
 	return response.data;
+}
+
+export async function getSwilibDiff(platform: string, left: string, right: string) {
+	const response = await apiClient.post<SwilibEntryDiff[]>(`/api/swilib/diff`, { left, right, platform });
+	return response.data;
+}
+
+export async function downloadSwilibAs(target: string, format: string, code?: string) {
+	const formatToName: Record<string, string> = {
+		vkp: `swilib_${target}.vkp`,
+		blib: `swilib_${target}.blib`,
+		symbols: `symbols-${target}.txt`,
+		idc: `symbols-${target}.idc`,
+	};
+	const name = formatToName[format] ?? `swilib_${target}.${format}`;
+	const response = code ?
+		await apiClient.post<Blob>(`/api/swilib/download/${target}/${name}`, { code }, { responseType: 'blob' }) :
+		await apiClient.get<Blob>(`/api/swilib/download/${target}/${name}`, { responseType: 'blob' });
+	return {
+		name,
+		blob: response.data,
+	};
 }
 
 export async function getAvailableCpuSymbolsFiles(): Promise<CpuSymbolsFile[]> {

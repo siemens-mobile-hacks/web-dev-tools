@@ -1,5 +1,5 @@
 import { Component, createMemo, Show } from "solid-js";
-import { formatId } from "@/utils/format";
+import { formatAddress, formatId } from "@/utils/format";
 import { SwilibEntryTypeBadge } from "@/components/Swilib/SwilibEntryTypeBadge";
 import { SwilibEntryName } from "@/components/Swilib/SwilibEntryName";
 import { SwilibEntryBadges } from "@/components/Swilib/SwilibEntryBadges";
@@ -86,7 +86,7 @@ export const SwilibTableRow: Component<SwilibTableRowProps> = (props) => {
 			</td>
 			<td classList={{'text-muted': props.entry.name == null}}>
 				<Show when={props.targetEntry?.value != null}>
-					{props.targetEntry.value!.toString(16).padStart(8, '0').toUpperCase()}
+					{formatAddress(props.targetEntry.value!)}
 				</Show>
 			</td>
 			<SwilibCoverageValue platform={props.platform} value={coverage()[props.platform]} />

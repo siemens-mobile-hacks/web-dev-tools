@@ -42,7 +42,7 @@ export const SwilibTableRow: Component<SwilibTableRowProps> = (props) => {
 				<div class="d-flex justify-content-between align-items-center">
 					<div>
 						<SwilibEntryTypeBadge value={props.entry.type} />
-						<SwilibEntryName entry={props.entry} />
+						<SwilibEntryName name={props.entry.name} file={props.entry.file} />
 					</div>
 					<SwilibEntryBadges value={props.entry.flags}/>
 				</div>

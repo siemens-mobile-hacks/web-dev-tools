@@ -9,6 +9,7 @@ import { useNavigate } from "@solidjs/router";
 
 const SwilibCheckPage: Component = () => {
 	const navigate = useNavigate();
+	const [busy, setBusy] = createSignal(false);
 	const [temproraryFiles, setTemproraryFiles] = useTemporaryFilesStore();
 	const [platform, setPlatform] = makePersistedSignal(createSignal("ELKA"), { name: 'swilibPlatform' });
 
@@ -22,18 +23,25 @@ const SwilibCheckPage: Component = () => {
 		setTemproraryFiles("swilibVkp", text);
 	};
 
-	const handleSubmit = (e: Event) => {
+	const handleSubmit = async (e: Event) => {
 		e.preventDefault();
-		navigate(`/swilib/analysis/target/?target=${platform()}`);
+		setBusy(true);
+		try {
+			navigate(`/swilib/analysis/target/?target=${platform()}`);
+		} finally {
+			setBusy(false);
+		}
 	};
 
 	return (
-		<div class="d-flex flex-column h-100 gap-3">
-			<Row class="align-items-center justify-content-sm-between">
+		<div class="d-flex flex-column h-100">
+			<Row class="align-items-center justify-content-sm-between mb-3">
 				<Col xs="auto">
 					<Row>
 						<Col xs="auto">
-							<Button type="submit" onClick={handleSubmit}>Check swilib.vkp</Button>
+							<Button variant="outline-primary" onClick={handleSubmit} disabled={busy()}>
+								Check swilib.vkp
+							</Button>
 						</Col>
 						<Col xs="auto">
 							<Form.Select value={platform()} onChange={(e) => setPlatform(e.currentTarget.value)}>
