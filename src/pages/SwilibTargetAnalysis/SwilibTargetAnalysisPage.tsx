@@ -35,7 +35,7 @@ const SwilibTargetAnalysisPage: Component = () => {
 		}
 	});
 
-	const resourcesState = useResourcesState([devices, summaryAnalysis, targetAnalysis]);
+	const resourcesState = useResourcesState([devices, summaryAnalysis, targetAnalysis], { catchError: true });
 
 	const groups = () => tableOptions.groupByFile ? summaryAnalysis()?.files : ['swilib.h'];
 	const [selectedEntry, setSelectedEntry] = createSignal<SummarySwilibAnalysisEntry>();

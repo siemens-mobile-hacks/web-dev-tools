@@ -35,7 +35,7 @@ export const App: ParentComponent = (props) => {
 				onSidebarToggle={() => setSidebarOpen((prev) => !prev)}
 			/>
 			<Container fluid class="p-0">
-				<div class="d-flex flex-row gap-1">
+				<div class="d-flex flex-row">
 					<Show when={sidebarIsOffcanvas()} fallback={
 						<Sidebar />
 					}>

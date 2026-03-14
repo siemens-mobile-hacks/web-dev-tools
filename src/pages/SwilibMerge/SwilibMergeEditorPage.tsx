@@ -1,18 +1,17 @@
-import { Component, createMemo, createResource, createSignal, For, Show } from "solid-js";
+import { batch, Component, createMemo, createResource, For, Show } from "solid-js";
 import { getSwilibDiff, SwilibDiffAction } from "@/api/swilib";
 import { useTemporaryFilesStore } from "@/store/temporaryFiles";
-import { useSearchParams } from "@solidjs/router";
 import { formatAddress, formatId } from "@/utils/format";
-import { Alert, Form } from "solid-bootstrap";
+import { Alert, Button, Form } from "solid-bootstrap";
 import { SwilibEntryName } from "@/components/Swilib/SwilibEntryName";
 import clsx from "clsx";
+import { useSwilibMergeState } from "@/pages/SwilibMerge/store/swilibMergeState";
+import { Sticky } from "@/components/Layout/Sticky/Sticky";
 
-export const SwilibMergeEditorPage: Component = () => {
-	const [searchParams] = useSearchParams<{ platform: string }>();
-	const platform = () => searchParams.platform ?? '';
+export const SwilibMergeEditorPage: Component = () => {;
 	const [temporaryFiles] = useTemporaryFilesStore();
-	const [swilibDiff] = createResource(() => getSwilibDiff(platform(), temporaryFiles.sourceVkp, temporaryFiles.destinationVkp));
-	const [skipEntries, setSkipEntries] = createSignal<Set<number>>(new Set<number>());
+	const [mergeState, setMergeState] = useSwilibMergeState();
+	const [swilibDiff] = createResource(() => getSwilibDiff(mergeState.platform, temporaryFiles.sourceVkp, temporaryFiles.destinationVkp));
 
 	const conflicts = createMemo(() => {
 		return swilibDiff()?.filter((row) => row.action == SwilibDiffAction.ASK || row.left?.error || row.right?.error);
@@ -20,87 +19,82 @@ export const SwilibMergeEditorPage: Component = () => {
 
 	const newEntries = createMemo(() => {
 		return swilibDiff()?.filter((row) => row.action != SwilibDiffAction.ASK && !row.left?.error && !row.right?.error);
-	})
-
-	createMemo(() => {
-		console.log(swilibDiff());
 	});
 
-	const handleRowClick = (e: MouseEvent) => {
-		console.log('Row clicked', e);
+	const isDone = createMemo(() => Object.values(mergeState.answers).every((action) => action != SwilibDiffAction.ASK));
+	const conflictsCount = createMemo(() => conflicts()?.length ?? 0);
+	const unresolvedConflictsCount = createMemo(() => Object.values(mergeState.answers).filter((action) => action == SwilibDiffAction.ASK).length);
+
+	const globalNewEntriesCheckState = createMemo(() => {
+		const newEntriesDiff = newEntries();
+		if (!newEntriesDiff)
+			return true;
+		return newEntriesDiff.every((row) => mergeState.answers[row.id] != SwilibDiffAction.DELETE);
+	});
+
+	createMemo(() => {
+		const diff = swilibDiff()
+		if (!diff)
+			return;
+		const answers: Record<number, SwilibDiffAction> = { ...mergeState.answers };
+		for (const row of diff) {
+			if (!(row.id in answers))
+				answers[row.id] = row.action;
+		}
+		setMergeState("answers", answers);
+	});
+
+	const toggleNewEntry = (id: number, newState?: boolean) => {
+		const row = newEntries()?.find((row) => row.id == id);
+		if (!row)
+			return;
+
+		if (newState === undefined)
+			newState = mergeState.answers[id] == SwilibDiffAction.DELETE;
+
+		if (newState) {
+			if (row.right) {
+				setMergeState("answers", id, SwilibDiffAction.RIGHT);
+			} else if (row.left) {
+				setMergeState("answers", id, SwilibDiffAction.LEFT);
+			}
+		} else {
+			setMergeState("answers", id, SwilibDiffAction.DELETE);
+		}
 	};
 
-	const markEntryAsSkip = (id: number, skip: boolean) => {
-		setSkipEntries((prev) => {
-			const newSet = new Set(prev);
-			if (skip) {
-				newSet.add(id);
-			} else {
-				newSet.delete(id);
-			}
-			return newSet;
-		})
-	}
+	const toggleAllNewEntries = (state: boolean) => {
+		batch(() => {
+			const newEntriesDiff = newEntries();
+			if (!newEntriesDiff)
+				return;
+			for (const row of newEntriesDiff)
+				toggleNewEntry(row.id, state);
+		});
+	};
 
 	return <>
-		<Show when={newEntries()?.length}>
-			<h4>New entries ({newEntries()?.length})</h4>
-			<table
-				class="table table-bordered table-hover table-sticky-header"
-				style={{"width": "auto"}}
-			>
-				<thead class="thead-dark">
-					<tr>
-						<th>
-							<Form.Check type="checkbox" />
-						</th>
-						<th class="text-center">
-							<small>ID</small>
-						</th>
-						<th>
-							<small>Symbol</small>
-						</th>
-						<th>
-							<small>source.vkp</small>
-						</th>
-						<th>
-							<small>destination.vkp</small>
-						</th>
-					</tr>
-				</thead>
-				<tbody>
-					<For each={newEntries()}>{(row) => <>
-						<tr
-							class={clsx("cursor-pointer", skipEntries().has(row.id) ? "table-danger" : "table-success")}
-							onClick={() => markEntryAsSkip(row.id, !skipEntries().has(row.id))}
-						>
-							<td>
-								<Form.Check
-									type="checkbox"
-									checked={!skipEntries().has(row.id)}
-									onChange={(e) => markEntryAsSkip(row.id, !e.currentTarget.checked)}
-								/>
-							</td>
-							<td>
-								{formatId(row.id)}
-							</td>
-							<td>
-								<SwilibEntryName name={row.name} />
-							</td>
-							<td>
-								{row.left ? formatAddress(row.left.value) : ''}
-							</td>
-							<td>
-								{row.right ? formatAddress(row.right.value) : ''}
-							</td>
-						</tr>
-					</>}</For>
-				</tbody>
-			</table>
-		</Show>
+		<Sticky>
+			<div class="d-flex gap-2 align-items-center ">
+				<Button variant="outline-success" size="sm" disabled={!isDone()}>
+					<i class="bi bi-download"></i> Download
+				</Button>
 
-		<Show when={conflicts()?.length}>
-			<h4>Conflicts ({conflicts()?.length})</h4>
+				<Show when={conflictsCount() > 0}>
+					<div>
+						<Show when={isDone()} fallback={
+							<i class="bi bi-x-circle text-danger me-1"></i>
+						}>
+							<i class="bi bi-check-circle text-success me-1"></i>
+						</Show>
+						Resolved <b>{conflictsCount() - unresolvedConflictsCount()}</b> of <b>{conflictsCount()}</b> conflicts.
+					</div>
+				</Show>
+			</div>
+		</Sticky>
+
+		<Show when={conflictsCount() > 0}>
+			<h4>Conflicts ({conflictsCount()})</h4>
 
 			<Alert variant="warning">
 				Some entries can't be merged automatically. Please resolve conflicts manually.<br />
@@ -114,7 +108,7 @@ export const SwilibMergeEditorPage: Component = () => {
 					<div class="d-flex flex-column gap-1">
 						<Form.Check
 							inline
-							checked={row.action == SwilibDiffAction.LEFT}
+							checked={mergeState.answers[row.id] == SwilibDiffAction.LEFT}
 							label={
 								<span class={clsx(row.left?.error && "text-danger")}>
 									<span class="font-monospace">
@@ -132,7 +126,7 @@ export const SwilibMergeEditorPage: Component = () => {
 						/>
 						<Form.Check
 							inline
-							checked={row.action == SwilibDiffAction.RIGHT}
+							checked={mergeState.answers[row.id] == SwilibDiffAction.RIGHT}
 							label={
 								<span class={clsx(row.right?.error && "text-danger")}>
 									<span class="font-monospace">
@@ -150,7 +144,7 @@ export const SwilibMergeEditorPage: Component = () => {
 						/>
 						<Form.Check
 							inline
-							checked={row.action == SwilibDiffAction.DELETE}
+							checked={mergeState.answers[row.id] == SwilibDiffAction.DELETE}
 							label="Remove from swilib"
 							name={`diff_${row.id}`}
 							id={`diff_${row.id}_delete`}
@@ -161,16 +155,22 @@ export const SwilibMergeEditorPage: Component = () => {
 				<hr />
 			</>}</For>
 		</Show>
-	</>;
-	/*
-	return (
-		<div>
+
+		<Show when={newEntries()?.length}>
+			<h4>New entries ({newEntries()?.length})</h4>
 			<table
 				class="table table-bordered table-hover table-sticky-header"
 				style={{"width": "auto"}}
 			>
 				<thead class="thead-dark">
 				<tr>
+					<th>
+						<Form.Check
+							type="checkbox"
+							checked={globalNewEntriesCheckState()}
+							onChange={(e) => toggleAllNewEntries(e.currentTarget.checked)}
+						/>
+					</th>
 					<th class="text-center">
 						<small>ID</small>
 					</th>
@@ -183,49 +183,42 @@ export const SwilibMergeEditorPage: Component = () => {
 					<th>
 						<small>destination.vkp</small>
 					</th>
-					<th>
-						<small>Symbol</small>
-					</th>
 				</tr>
 				</thead>
 				<tbody>
-				<For each={swilibDiff()}>{(row) =>
-					<tr>
-						<td>{row.id}</td>
+				<For each={newEntries()}>{(row) => <>
+					<tr
+						class={clsx(
+							"cursor-pointer",
+							mergeState.answers[row.id] == SwilibDiffAction.DELETE ? "table-danger" : "table-success"
+						)}
+						onClick={() => toggleNewEntry(row.id)}
+					>
 						<td>
-							{row.symbol}
-							<Show when={row.left?.error}>
-								<div class="text-danger">
-									{row.left?.error}
-								</div>
-							</Show>
+							<Form.Check
+								type="checkbox"
+								checked={mergeState.answers[row.id] != SwilibDiffAction.DELETE}
+								onChange={(e) => toggleNewEntry(row.id, e.currentTarget.checked)}
+							/>
 						</td>
 						<td>
-							<Show when={row.left}>
-								{formatAddress(row.left!.value)}
-								<input type="radio"/>
-							</Show>
+							{formatId(row.id)}
 						</td>
 						<td>
-							<Show when={row.right}>
-								<input type="radio"/>
-								{formatAddress(row.right!.value)}
-							</Show>
+							<SwilibEntryName name={row.name} />
 						</td>
 						<td>
-							{row.symbol}
-							<Show when={row.right?.error}>
-								<div class="text-danger">
-									{row.right?.error}
-								</div>
-							</Show>
+							{row.left ? formatAddress(row.left.value) : ''}
+						</td>
+						<td>
+							{row.right ? formatAddress(row.right.value) : ''}
 						</td>
 					</tr>
-				}</For>
+				</>}</For>
 				</tbody>
 			</table>
-		</div>
-	);*/
+		</Show>
+	</>;
 };
 
 export default SwilibMergeEditorPage;

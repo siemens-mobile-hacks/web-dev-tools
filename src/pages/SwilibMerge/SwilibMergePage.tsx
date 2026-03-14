@@ -6,11 +6,13 @@ import { SWILIB_PLATFORMS } from "@/api/swilib";
 import { useTemporaryFilesStore } from "@/store/temporaryFiles";
 import { makePersistedSignal } from "@/utils/makePersistedSignal";
 import { useNavigate } from "@solidjs/router";
+import { useSwilibMergeState } from "@/pages/SwilibMerge/store/swilibMergeState";
 
 const SwilibMergePage: Component = () => {
 	const navigate = useNavigate();
 	const [selectedFile, setSelectedFile] = createSignal('source');
 	const [temporaryFiles, setTemproraryFiles] = useTemporaryFilesStore();
+	const [, setMergeState] = useSwilibMergeState();
 	const [platform, setPlatform] = makePersistedSignal(createSignal("ELKA"), { name: 'swilibPlatform' });
 
 	const handleInput = async (e: Event) => {
@@ -34,7 +36,11 @@ const SwilibMergePage: Component = () => {
 
 	const handleSubmit = async (e: Event) => {
 		e.preventDefault();
-		navigate(`/swilib/merge/editor?platform=${platform()}`);
+		setMergeState({
+			answers: {},
+			platform: platform(),
+		});
+		navigate(`/swilib/merge/editor`);
 	};
 
 	return (

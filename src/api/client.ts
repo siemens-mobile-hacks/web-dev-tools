@@ -28,7 +28,10 @@ export class ApiNetworkError extends ApiError {
 apiClient.interceptors.response.use((response) => response, handleApiError)
 
 async function handleApiError(error: AxiosError | unknown) {
-	if (error instanceof AxiosError && error.name !== 'CanceledError') {
+	if (axios.isCancel(error))
+		return Promise.reject(error);
+
+	if (error instanceof AxiosError) {
 		if (!error.response) {
 			return Promise.reject(
 				new ApiNetworkError(
@@ -54,5 +57,6 @@ async function handleApiError(error: AxiosError | unknown) {
 			);
 		}
 	}
+
 	return Promise.reject(error)
 }

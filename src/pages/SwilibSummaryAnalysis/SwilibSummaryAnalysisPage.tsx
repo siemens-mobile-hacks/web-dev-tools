@@ -12,9 +12,10 @@ const SwilibSummaryAnalysisPage: Component = () => {
 	const [tableOptions, setTableOptions] = useSwilibTableOptionsStore();
 	const [devices] = createResource(getAvailableSwilibDevices);
 	const [summaryAnalysis] = createResource(getSummarySwilibAnalysis);
-	const resourcesState = useResourcesState([devices, summaryAnalysis]);
 	const groups = () => tableOptions.groupByFile ? summaryAnalysis()?.files : ['swilib.h'];
 	const [selectedEntry, setSelectedEntry] = createSignal<SummarySwilibAnalysisEntry>();
+
+	const resourcesState = useResourcesState([devices, summaryAnalysis], { catchError: true });
 
 	const handleFilterByType = (e: Event & { currentTarget: HTMLInputElement }) => {
 		if (e.currentTarget.checked)
