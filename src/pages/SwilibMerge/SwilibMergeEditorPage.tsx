@@ -1,4 +1,4 @@
-import { batch, Component, createMemo, createResource, For, Show } from "solid-js";
+import { batch, Component, createEffect, createMemo, createResource, For, Show } from "solid-js";
 import { getSwilibDiff, SwilibDiffAction } from "@/api/swilib";
 import { useTemporaryFilesStore } from "@/store/temporaryFiles";
 import { formatAddress, formatId } from "@/utils/format";
@@ -7,8 +7,9 @@ import { SwilibEntryName } from "@/components/Swilib/SwilibEntryName";
 import clsx from "clsx";
 import { useSwilibMergeState } from "@/pages/SwilibMerge/store/swilibMergeState";
 import { Sticky } from "@/components/Layout/Sticky/Sticky";
+import { reconcile } from "solid-js/store";
 
-export const SwilibMergeEditorPage: Component = () => {;
+export const SwilibMergeEditorPage: Component = () => {
 	const [temporaryFiles] = useTemporaryFilesStore();
 	const [mergeState, setMergeState] = useSwilibMergeState();
 	const [swilibDiff] = createResource(() => getSwilibDiff(mergeState.platform, temporaryFiles.sourceVkp, temporaryFiles.destinationVkp));
@@ -21,9 +22,18 @@ export const SwilibMergeEditorPage: Component = () => {;
 		return swilibDiff()?.filter((row) => row.action != SwilibDiffAction.ASK && !row.left?.error && !row.right?.error);
 	});
 
-	const isDone = createMemo(() => Object.values(mergeState.answers).every((action) => action != SwilibDiffAction.ASK));
+	const isDone = createMemo(() => {
+		return Object.values(mergeState.answers)
+			.every((action) => action != SwilibDiffAction.ASK);
+	});
+
 	const conflictsCount = createMemo(() => conflicts()?.length ?? 0);
-	const unresolvedConflictsCount = createMemo(() => Object.values(mergeState.answers).filter((action) => action == SwilibDiffAction.ASK).length);
+
+	const unresolvedConflictsCount = createMemo(() => {
+		return Object.values(mergeState.answers)
+			.filter((action) => action == SwilibDiffAction.ASK)
+			.length;
+	});
 
 	const globalNewEntriesCheckState = createMemo(() => {
 		const newEntriesDiff = newEntries();
@@ -32,7 +42,7 @@ export const SwilibMergeEditorPage: Component = () => {;
 		return newEntriesDiff.every((row) => mergeState.answers[row.id] != SwilibDiffAction.DELETE);
 	});
 
-	createMemo(() => {
+	const initAnswersData = () => {
 		const diff = swilibDiff()
 		if (!diff)
 			return;
@@ -41,8 +51,29 @@ export const SwilibMergeEditorPage: Component = () => {;
 			if (!(row.id in answers))
 				answers[row.id] = row.action;
 		}
-		setMergeState("answers", answers);
-	});
+		setMergeState("answers", reconcile(answers));
+	};
+
+	createEffect(() => initAnswersData());
+
+	const resetMergeAnswers = () => {
+		setMergeState("answers", reconcile({}));
+		initAnswersData();
+	};
+
+	const autoResolveMergeAnswers = (preferAction: SwilibDiffAction) => {
+		const answers: Record<number, SwilibDiffAction> = { ...mergeState.answers };
+		for (const row of conflicts()!) {
+			if (preferAction == SwilibDiffAction.LEFT && row.left && !row.left.error) {
+				answers[row.id] = SwilibDiffAction.LEFT;
+			} else if (preferAction == SwilibDiffAction.RIGHT && row.right && !row.right.error) {
+				answers[row.id] = SwilibDiffAction.RIGHT;
+			} else if (preferAction == SwilibDiffAction.DELETE) {
+				answers[row.id] = SwilibDiffAction.DELETE;
+			}
+		}
+		setMergeState("answers", reconcile(answers));
+	};
 
 	const toggleNewEntry = (id: number, newState?: boolean) => {
 		const row = newEntries()?.find((row) => row.id == id);
@@ -75,7 +106,7 @@ export const SwilibMergeEditorPage: Component = () => {;
 
 	return <>
 		<Sticky>
-			<div class="d-flex gap-2 align-items-center ">
+			<div class="d-flex gap-2 align-items-center px-3 py-2 border-bottom">
 				<Button variant="outline-success" size="sm" disabled={!isDone()}>
 					<i class="bi bi-download"></i> Download
 				</Button>
@@ -94,11 +125,43 @@ export const SwilibMergeEditorPage: Component = () => {;
 		</Sticky>
 
 		<Show when={conflictsCount() > 0}>
-			<h4>Conflicts ({conflictsCount()})</h4>
+			<h4>
+				<div class="d-inline-flex gap-2 d-align-items-center">
+					<div>Conflicts ({conflictsCount()})</div>
+					<Button
+						variant="outline-secondary"
+						size="sm"
+						onClick={() => resetMergeAnswers()}
+					>
+						Reset choices
+					</Button>
+					<Button
+						variant="outline-secondary"
+						size="sm"
+						onClick={() => autoResolveMergeAnswers(SwilibDiffAction.LEFT)}
+					>
+						Prefer LEFT
+					</Button>
+					<Button
+						variant="outline-secondary"
+						size="sm"
+						onClick={() => autoResolveMergeAnswers(SwilibDiffAction.RIGHT)}
+					>
+						Prefer RIGHT
+					</Button>
+					<Button
+						variant="outline-danger"
+						size="sm"
+						onClick={() => autoResolveMergeAnswers(SwilibDiffAction.DELETE)}
+					>
+						REMOVE
+					</Button>
+				</div>
+			</h4>
 
 			<Alert variant="warning">
 				Some entries can't be merged automatically. Please resolve conflicts manually.<br />
-				First choice is left (source.vkp), second choice is right (destination.vkp).
+				First choice is merge left (source.vkp), second choice is merge right (destination.vkp).
 			</Alert>
 
 			<For each={conflicts()}>{(row) => <>
@@ -109,6 +172,7 @@ export const SwilibMergeEditorPage: Component = () => {;
 						<Form.Check
 							inline
 							checked={mergeState.answers[row.id] == SwilibDiffAction.LEFT}
+							onChange={(e) => e.currentTarget.checked && setMergeState("answers", row.id, SwilibDiffAction.LEFT)}
 							label={
 								<span class={clsx(row.left?.error && "text-danger")}>
 									<span class="font-monospace">
@@ -119,7 +183,6 @@ export const SwilibMergeEditorPage: Component = () => {;
 									</Show>
 								</span>
 							}
-							name={`diff_${row.id}`}
 							id={`diff_${row.id}_left`}
 							type="radio"
 							disabled={row.left == null || row.left?.error != null}
@@ -127,6 +190,7 @@ export const SwilibMergeEditorPage: Component = () => {;
 						<Form.Check
 							inline
 							checked={mergeState.answers[row.id] == SwilibDiffAction.RIGHT}
+							onChange={(e) => e.currentTarget.checked && setMergeState("answers", row.id, SwilibDiffAction.RIGHT)}
 							label={
 								<span class={clsx(row.right?.error && "text-danger")}>
 									<span class="font-monospace">
@@ -137,7 +201,6 @@ export const SwilibMergeEditorPage: Component = () => {;
 									</Show>
 								</span>
 							}
-							name={`diff_${row.id}`}
 							id={`diff_${row.id}_right`}
 							type="radio"
 							disabled={row.right == null || row.right?.error != null}
@@ -145,8 +208,8 @@ export const SwilibMergeEditorPage: Component = () => {;
 						<Form.Check
 							inline
 							checked={mergeState.answers[row.id] == SwilibDiffAction.DELETE}
+							onChange={(e) => e.currentTarget.checked && setMergeState("answers", row.id, SwilibDiffAction.DELETE)}
 							label="Remove from swilib"
-							name={`diff_${row.id}`}
 							id={`diff_${row.id}_delete`}
 							type="radio"
 						/>

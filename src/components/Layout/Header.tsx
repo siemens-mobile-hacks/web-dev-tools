@@ -15,7 +15,7 @@ interface HeaderProps {
 export const Header: Component<HeaderProps> = (props) => {
 	const { theme, switchTheme } = useTheme();
 
-	return (
+	return <>
 		<div class="header">
 			<Show when={props.showSidebarToggleButton}>
 				<button class="header__button" onClick={() => props.onSidebarToggle?.()}>
@@ -43,5 +43,5 @@ export const Header: Component<HeaderProps> = (props) => {
 				</Switch>
 			</button>
 		</div>
-	);
+	</>;
 };

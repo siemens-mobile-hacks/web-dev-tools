@@ -1,16 +1,7 @@
 .sticky {
-	--sticky-y-padding: 0.5rem;
-	--sticky-y-offset: -0.5rem;
 	position: sticky;
-	top: calc(var(--bs-header-height) + var(--sticky-y-padding));
-	background: var(--bs-body-bg);
+	top: var(--bs-header-height);
 	z-index: 1020;
-	padding: var(--sticky-y-padding) 0;
-	transform: translateY(var(--sticky-y-offset));
-
-	&--is-sticky {
-		box-shadow: var(--bs-box-shadow-sm);
-		margin: 0 -1rem;
-		padding: var(--sticky-y-padding) 1rem;
-	}
+	background: var(--bs-body-bg);
+	margin: -1rem -1rem 1rem -1rem;
 }
