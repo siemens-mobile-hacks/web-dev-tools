@@ -1,5 +1,5 @@
-import { batch, Component, createEffect, createMemo, createResource, For, Show } from "solid-js";
-import { getSwilibDiff, SwilibDiffAction } from "@/api/swilib";
+import { batch, Component, createEffect, createMemo, createResource, createSignal, For, on, Show } from "solid-js";
+import { getSwilibDiff, getSwilibDiffResult, SwilibDiffAction } from "@/api/swilib";
 import { useTemporaryFilesStore } from "@/store/temporaryFiles";
 import { formatAddress, formatId } from "@/utils/format";
 import { Alert, Button, Form } from "solid-bootstrap";
@@ -8,11 +8,17 @@ import clsx from "clsx";
 import { useSwilibMergeState } from "@/pages/SwilibMerge/store/swilibMergeState";
 import { Sticky } from "@/components/Layout/Sticky/Sticky";
 import { reconcile } from "solid-js/store";
+import { downloadBlob } from "@/utils/download";
 
 export const SwilibMergeEditorPage: Component = () => {
 	const [temporaryFiles] = useTemporaryFilesStore();
 	const [mergeState, setMergeState] = useSwilibMergeState();
-	const [swilibDiff] = createResource(() => getSwilibDiff(mergeState.platform, temporaryFiles.sourceVkp, temporaryFiles.destinationVkp));
+	const [swilibDiff] = createResource(() => getSwilibDiff(
+		mergeState.platform,
+		temporaryFiles.sourceVkp,
+		temporaryFiles.destinationVkp
+	));
+	const [isDownloading, setIsDownloading] = createSignal(false);
 
 	const conflicts = createMemo(() => {
 		return swilibDiff()?.filter((row) => row.action == SwilibDiffAction.ASK || row.left?.error || row.right?.error);
@@ -54,17 +60,19 @@ export const SwilibMergeEditorPage: Component = () => {
 		setMergeState("answers", reconcile(answers));
 	};
 
-	createEffect(() => initAnswersData());
+	createEffect(on(swilibDiff, () => initAnswersData()));
 
 	const resetMergeAnswers = () => {
-		setMergeState("answers", reconcile({}));
+		autoResolveMergeAnswers(undefined);
 		initAnswersData();
 	};
 
-	const autoResolveMergeAnswers = (preferAction: SwilibDiffAction) => {
+	const autoResolveMergeAnswers = (preferAction?: SwilibDiffAction) => {
 		const answers: Record<number, SwilibDiffAction> = { ...mergeState.answers };
 		for (const row of conflicts()!) {
-			if (preferAction == SwilibDiffAction.LEFT && row.left && !row.left.error) {
+			if (preferAction == null) {
+				delete answers[row.id];
+			} else if (preferAction == SwilibDiffAction.LEFT && row.left && !row.left.error) {
 				answers[row.id] = SwilibDiffAction.LEFT;
 			} else if (preferAction == SwilibDiffAction.RIGHT && row.right && !row.right.error) {
 				answers[row.id] = SwilibDiffAction.RIGHT;
@@ -104,10 +112,41 @@ export const SwilibMergeEditorPage: Component = () => {
 		});
 	};
 
+	const getSwilibTarget = () => {
+		for (const source of [temporaryFiles.destinationVkp, temporaryFiles.sourceVkp]) {
+			const match = source.match(/;\s*([a-z0-9]+(?:v|sw)\d+)\s*$/mi);
+			if (match)
+				return match[1];
+		}
+		return mergeState.platform;
+	};
+
+	const handleDownload = async () => {
+		try {
+			setIsDownloading(true);
+			const blob = await getSwilibDiffResult(
+				mergeState.platform,
+				temporaryFiles.sourceVkp,
+				temporaryFiles.destinationVkp,
+				getSwilibTarget(),
+				mergeState.answers
+			);
+			const dateSuffix = new Date().toISOString().replace(/-/g, '').slice(0, 8);
+			downloadBlob(blob, `swilib-merged-${getSwilibTarget()}-${dateSuffix}.vkp`);
+		} finally {
+			setIsDownloading(false);
+		}
+	};
+
 	return <>
 		<Sticky>
 			<div class="d-flex gap-2 align-items-center px-3 py-2 border-bottom">
-				<Button variant="outline-success" size="sm" disabled={!isDone()}>
+				<Button
+					variant="outline-success"
+					size="sm"
+					disabled={!isDone() || isDownloading()}
+					onClick={() => handleDownload()}
+				>
 					<i class="bi bi-download"></i> Download
 				</Button>
 

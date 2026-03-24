@@ -127,6 +127,15 @@ export async function getSwilibDiff(platform: string, left: string, right: strin
 	return response.data;
 }
 
+export async function getSwilibDiffResult(platform: string, left: string, right: string, target: string, answers: Record<number, SwilibDiffAction>) {
+	const response = await apiClient.post<Blob>(
+		`/api/swilib/diff/result`,
+		{ left, right, target, platform, answers },
+		{ responseType: 'blob' }
+	);
+	return response.data;
+}
+
 export async function downloadSwilibAs(target: string, format: string, code?: string) {
 	const formatToName: Record<string, string> = {
 		vkp: `swilib_${target}.vkp`,
