@@ -13,6 +13,7 @@ const ROUTES = [
 	`/swilib/analysis/target`,
 	`/swilib/check`,
 	`/swilib/merge`,
+	`/swilib/merge/editor`,
 
 	`/re`,
 	`/re/symbols`,
